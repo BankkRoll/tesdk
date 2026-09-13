@@ -28,10 +28,12 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing requires npm 11.5.1 or later. Node 22 ships an
-      # older npm, so it is upgraded before the publish step runs.
+      # Trusted publishing requires npm 11.5.1 or later, and Node 22 ships an
+      # older npm. Pinned to the 11.x line rather than latest: npm 12 changed
+      # the `npm pack --json` shape, which the attw check in `verify` cannot
+      # parse yet.
       - name: Upgrade npm for trusted publishing
-        run: npm install -g npm@latest
+        run: npm install -g npm@^11.5.1
 
       - run: npm ci
       - run: npm run verify
