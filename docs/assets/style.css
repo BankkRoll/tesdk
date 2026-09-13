@@ -469,13 +469,13 @@ kbd {
   font-size: 0.87em;
   white-space: nowrap;
 }
-.main a:not(.card):not(.btn):not(.nav-link) {
+.main a:not(.card):not(.btn):not(.nav-link):not(.pg-item) {
   color: var(--blue);
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--blue) 32%, transparent);
   text-underline-offset: 2px;
 }
-.main a:not(.card):not(.btn):not(.nav-link):hover {
+.main a:not(.card):not(.btn):not(.nav-link):not(.pg-item):hover {
   text-decoration-color: var(--blue);
 }
 /* ── Hero ────────────────────────────────────────────────────────────────── */
@@ -1332,11 +1332,127 @@ tbody tr:hover {
   overscroll-behavior: contain;
 }
 
-/* ── Page actions (header) ───────────────────────────────────────────────── */
+/* ── Page masthead ───────────────────────────────────────────────────────── */
+
+.pg-head {
+  margin: 0 0 40px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Breadcrumb and actions share a row so the controls sit at the title block's
+   top-right rather than in the site header, where they read as global. */
+.pg-head-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 32px;
+  margin-bottom: 18px;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.crumbs a {
+  color: var(--text-faint);
+  text-decoration: none;
+  transition: color 0.14s ease;
+}
+
+.crumbs a:hover {
+  color: var(--text);
+}
+
+.crumb-sep {
+  display: inline-flex;
+  opacity: 0.5;
+}
+
+/* The shared chevron points down; the breadcrumb needs it pointing along the
+   trail. */
+.crumb-sep svg {
+  width: 13px;
+  height: 13px;
+  transform: rotate(-90deg);
+}
+
+.crumb-now {
+  color: var(--text-muted);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-eyebrow {
+  margin-bottom: 10px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.pg-head h1 {
+  margin-bottom: 14px;
+}
+
+.pg-title-code {
+  font-family: var(--mono);
+  font-size: 32px;
+  letter-spacing: -0.02em;
+}
+
+.pg-head .lede {
+  margin-bottom: 0;
+  max-width: 68ch;
+}
+
+.pg-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.chip-icon {
+  display: inline-flex;
+  color: var(--text-faint);
+}
+
+.chip-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ── Page actions ────────────────────────────────────────────────────────── */
 
 .pg-actions {
   display: flex;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .pg-btn {
@@ -1344,7 +1460,7 @@ tbody tr:hover {
   align-items: center;
   gap: 6px;
   height: 32px;
-  padding: 0 10px;
+  padding: 0 11px;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius) 0 0 var(--radius);
@@ -1366,10 +1482,26 @@ tbody tr:hover {
   color: var(--text);
 }
 
-.pg-btn svg {
+/* A fixed slot: the icon swaps to a tick on success, and an intrinsically
+   sized box would shift the label when it does. */
+.pg-btn-icon {
+  display: grid;
+  place-items: center;
   width: 14px;
   height: 14px;
   flex-shrink: 0;
+}
+
+.pg-btn-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Reserves the width of the longest state, "Copy failed", so reporting the
+   outcome never resizes the control or nudges the trigger beside it. */
+.pg-btn-label {
+  min-width: 74px;
+  text-align: left;
 }
 
 .pg-copy.done {
@@ -1395,23 +1527,39 @@ tbody tr:hover {
   height: 13px;
 }
 
-/* Anchored to the right edge: the control sits near the end of the header, so
-   a left-anchored menu would run off screen. */
+.pg-more[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+/* Anchored to the right edge: the control sits at the end of its row, so a
+   left-anchored menu would run off screen. */
 .pg-menu {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
   z-index: 70;
-  min-width: 240px;
-  padding: 5px;
+  min-width: 248px;
+  padding: 6px;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
 }
 
+.pg-group {
+  padding: 7px 9px 5px;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Three fixed slots — icon, label, hint — so labels align on one column
+   whether or not a row carries a trailing hint. */
 .pg-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -1430,21 +1578,42 @@ tbody tr:hover {
     color 0.12s ease;
 }
 
+/* Rows are menu items, not prose: the page's link styling would give the
+   anchors a colour and underline that the button rows do not share. */
+.pg-item,
+.pg-item:visited {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
 .pg-item:hover {
   background: var(--surface-hover);
   color: var(--text);
+  text-decoration: none;
 }
 
-.pg-item svg {
+.pg-item-icon {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+}
+
+.pg-item-icon svg {
   width: 15px;
   height: 15px;
-  flex-shrink: 0;
+}
+
+.pg-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* The trailing external glyph is a hint, not a peer of the leading icon. */
 .pg-item .ext {
-  margin-left: auto;
-  opacity: 0.5;
+  display: inline-flex;
+  opacity: 0.45;
 }
 
 .pg-item .ext svg {
@@ -1456,10 +1625,28 @@ tbody tr:hover {
   opacity: 1;
 }
 
-/* Brand marks in the menu keep their own colour so the destination is
-   recognisable at a glance. */
-.pg-item .brand-ink {
+/* Brand marks keep their own colour so the destination is recognisable at a
+   glance. */
+.brand-ink {
   display: inline-flex;
+  flex-shrink: 0;
+}
+
+.brand-ink svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Marks render in their official colour by default. Two lose the panel they
+   sit on — a blanket filter cannot fix both, since one needs darkening and the
+   other lightening — so each is corrected only in the theme where it fails,
+   by the least amount that clears 3:1. */
+.brand-ink[data-brand='perplexity'] {
+  filter: brightness(0.82);
+}
+
+.dark .brand-ink[data-brand='openai'] {
+  filter: brightness(1.75) saturate(0.9);
 }
 
 .pg-sep {
@@ -1470,51 +1657,55 @@ tbody tr:hover {
 
 /* ── Brand cards ─────────────────────────────────────────────────────────── */
 
+/* A compact row: small mark, title, description. The mark identifies the card
+   at a glance without becoming the card's subject. */
 .card-brand {
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-areas: 'mark title' 'mark body';
-  column-gap: 14px;
-  row-gap: 2px;
-  align-items: start;
+  grid-template-areas: 'mark title' '. body';
+  column-gap: 10px;
+  row-gap: 3px;
+  align-items: center;
+  padding: 16px 18px;
 }
 
 .card-mark {
   grid-area: mark;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: color-mix(in srgb, currentColor 12%, transparent);
+  width: 18px;
+  height: 18px;
 }
 
 .card-mark svg {
-  width: 19px;
-  height: 19px;
+  width: 100%;
+  height: 100%;
 }
 
 .card-brand .card-t {
   grid-area: title;
   margin-bottom: 0;
+  font-size: 14px;
 }
 
 .card-brand .card-d {
   grid-area: body;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .card-t .ext {
   margin-left: auto;
-  opacity: 0.45;
+  opacity: 0.4;
 }
 
 .card-t .ext svg {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
 }
 
 a.card:hover .ext {
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .card-icon {
@@ -1522,34 +1713,59 @@ a.card:hover .ext {
 }
 
 .card-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
-/* ── Responsive: page actions ────────────────────────────────────────────── */
+/* ── Responsive: masthead ────────────────────────────────────────────────── */
 
-@media (max-width: 1080px) {
-  /* Label goes first; the icon still communicates the action. */
-  .pg-copy span {
-    display: none;
+@media (max-width: 700px) {
+  .pg-head {
+    margin-bottom: 32px;
+    padding-bottom: 22px;
   }
 
-  .pg-copy {
-    width: 32px;
-    padding: 0;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 620px) {
-  /* The dropdown carries every action, so the phone header keeps just the
-     trigger rather than dropping the feature. */
-  .pg-copy {
-    display: none;
+  /* Stacked: the breadcrumb wraps on narrow screens, and a shared row would
+     squeeze the actions to nothing. */
+  .pg-head-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
   }
 
-  .pg-more {
+  .pg-actions {
     margin-left: 0;
-    border-radius: var(--radius);
+  }
+
+  .pg-menu {
+    right: auto;
+    left: 0;
+  }
+
+  .pg-title-code {
+    font-size: 24px;
   }
 }
+
+@media (max-width: 420px) {
+  /* Anchor to the masthead rather than the trigger: the actions row is only as
+     wide as its buttons, so spanning it would squeeze the labels to ellipses,
+     while the masthead spans the whole content column. */
+  .pg-menu-wrap {
+    position: static;
+  }
+
+  .pg-head-top {
+    position: relative;
+  }
+
+  .pg-menu {
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    min-width: 0;
+    width: auto;
+  }
+}
+

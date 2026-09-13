@@ -3,6 +3,8 @@
  */
 
 import { getApi } from '../lib/data.js'
+import { ICON } from '../icons.js'
+import { pageHeader } from '../components/page-header.js'
 import { esc } from '../lib/dom.js'
 import { md } from '../lib/markdown.js'
 import { codeBlock } from '../components/ui.js'
@@ -12,8 +14,11 @@ export function pageTypes() {
   const aliases = getApi().shapes.filter((s) => s.kind === 'type')
 
   return `
-  <h1>Types</h1>
-  <p class="lede">${interfaces.length} interfaces and ${aliases.length} type aliases, exported from the package root.</p>
+  ${pageHeader({
+    section: 'Reference',
+    title: 'Types',
+    meta: [{ label: `${getApi().shapes.length} exported`, icon: ICON.layers }],
+  })}
 
   <h2 id="aliases">Type aliases</h2>
   ${aliases

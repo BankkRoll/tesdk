@@ -3,14 +3,20 @@
  */
 
 import { getApi } from '../lib/data.js'
+import { ICON } from '../icons.js'
+import { pageHeader } from '../components/page-header.js'
 
 import { codeBlock } from '../components/ui.js'
 
 export function pageAuth() {
   const p = getApi().package
   return `
-  <h1>Authentication</h1>
-  <p class="lede">Three token types, each for a different relationship between your application and the vehicles it reaches.</p>
+  ${pageHeader({
+    section: 'Getting started',
+    title: 'Authentication',
+    lede: 'Three token types, each for a different relationship between your application and the vehicles it reaches.',
+    meta: [{ label: 'OAuth 2.0 + PKCE', icon: ICON.key }],
+  })}
 
   <div class="table-wrap"><table>
     <thead><tr><th>Token</th><th>Represents</th><th>Grant</th></tr></thead>

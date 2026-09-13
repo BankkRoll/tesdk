@@ -57,7 +57,9 @@ export function route(onNavigate = () => {}) {
   $('.main').innerHTML = page.render()
   $('.sidebar').innerHTML = renderSidebar(page.path)
   $('.toc').innerHTML = renderToc()
-  $('.pg-actions').innerHTML = pageActions()
+  // Rendered into the page masthead, which the home page does not have.
+  const actions = $('.pg-actions')
+  if (actions) actions.innerHTML = pageActions()
 
   document.title = `${page.title} · tesdk`
   window.scrollTo({ top: 0 })

@@ -4,6 +4,8 @@
  */
 
 import { getApi } from '../lib/data.js'
+import { ICON } from '../icons.js'
+import { pageHeader } from '../components/page-header.js'
 import { esc } from '../lib/dom.js'
 import { md } from '../lib/markdown.js'
 import { codeBlock } from '../components/ui.js'
@@ -44,8 +46,12 @@ export function member(m, nsKey) {
 
 export function pageApiIndex() {
   return `
-  <h1>API reference</h1>
-  <p class="lede">Generated from the shipped type declarations, so it always matches the installed version.</p>
+  ${pageHeader({
+    section: 'Reference',
+    title: 'API reference',
+    lede: 'Generated from the shipped type declarations, so it always matches the installed version.',
+    meta: [{ label: `${getApi().stats.methods} methods`, icon: ICON.terminal }, { label: `${getApi().stats.namespaces} namespaces`, icon: ICON.layers }],
+  })}
 
   <h2 id="client">Client</h2>
   ${codeBlock(`const client = new TeslaClient({

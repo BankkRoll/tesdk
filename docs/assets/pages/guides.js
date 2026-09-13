@@ -3,14 +3,20 @@
  */
 
 import { getApi } from '../lib/data.js'
+import { ICON } from '../icons.js'
+import { pageHeader } from '../components/page-header.js'
 
 import { codeBlock } from '../components/ui.js'
 
 export function pageGuides() {
   const p = getApi().package
   return `
-  <h1>Guides</h1>
-  <p class="lede">The parts of the Fleet API that surprise people, and how this SDK models them.</p>
+  ${pageHeader({
+    section: 'Getting started',
+    title: 'Guides',
+    lede: 'The parts of the Fleet API that surprise people, and how this SDK models them.',
+    meta: [{ label: '6 topics', icon: ICON.book }],
+  })}
 
   <h2 id="regions">Regions</h2>
   <p>Fleet API is partitioned into three isolated deployments. A token minted for one is rejected by the others, so the region is a correctness concern rather than a latency optimization.</p>

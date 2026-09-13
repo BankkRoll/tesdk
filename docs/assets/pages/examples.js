@@ -3,13 +3,18 @@
  */
 
 import { getApi } from '../lib/data.js'
+import { pageHeader } from '../components/page-header.js'
 import { BRAND, BRAND_COLOR, ICON } from '../icons.js'
 
 export function pageExamples() {
   const repo = getApi().package.repository
   return `
-  <h1>Examples</h1>
-  <p class="lede">Four runnable applications and 45 focused snippets, all typechecked in CI against the built SDK.</p>
+  ${pageHeader({
+    section: 'Resources',
+    title: 'Examples',
+    lede: 'Four runnable applications and 45 focused snippets, all typechecked in CI against the built SDK.',
+    meta: [{ label: '4 apps', icon: ICON.terminal }, { label: '45 snippets', icon: ICON.book }],
+  })}
 
   <h2 id="apps">Applications</h2>
   <div class="grid">

@@ -3,11 +3,17 @@
  */
 
 import { codeBlock } from '../components/ui.js'
+import { ICON } from '../icons.js'
+import { pageHeader } from '../components/page-header.js'
 
 export function pageErrors() {
   return `
-  <h1>Errors</h1>
-  <p class="lede">Every failure is a <code>TeslaError</code> subclass, discriminable by class or by a stable <code>code</code>.</p>
+  ${pageHeader({
+    section: 'Getting started',
+    title: 'Errors',
+    lede: 'Every failure is a <code>TeslaError</code> subclass, discriminable by class or by a stable <code>code</code>.',
+    meta: [{ label: '10 error classes', icon: ICON.shield }],
+  })}
 
   ${codeBlock(`try {
   await client.commands.doorLock(vin)

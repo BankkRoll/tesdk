@@ -3,14 +3,20 @@
  */
 
 import { getApi } from '../lib/data.js'
+import { ICON } from '../icons.js'
+import { pageHeader } from '../components/page-header.js'
 
 import { codeBlock } from '../components/ui.js'
 
 export function pageQuickstart() {
   const p = getApi().package
   return `
-  <h1>Quickstart</h1>
-  <p class="lede">From an empty project to reading live vehicle data.</p>
+  ${pageHeader({
+    section: 'Getting started',
+    title: 'Quickstart',
+    lede: 'From an empty project to reading live vehicle data.',
+    meta: [{ label: '5 minutes', icon: ICON.bolt }],
+  })}
 
   <h2 id="install">1. Install</h2>
   ${codeBlock(`npm install ${p.name}`, 'terminal')}
