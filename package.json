@@ -44,6 +44,7 @@
   "types": "./dist/index.d.cts",
   "scripts": {
     "build": "tsdown",
+    "docs:build": "node docs/scripts/build-api.mjs",
     "dev": "tsdown --watch",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -4,12 +4,14 @@ import tseslint from 'typescript-eslint'
 export default tseslint.config(
   {
     // Examples are independent workspaces, each linted by its own toolchain.
+    // The docs site is plain browser and Node JavaScript outside any
+    // TypeScript project, so the type-aware rules here cannot parse it.
     ignores: [
       'dist/**',
       'coverage/**',
       'node_modules/**',
       'examples/**',
-      'code-snippets/**',
+      'docs/**',
       'eslint.config.js',
     ],
   },

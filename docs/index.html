@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>tesdk — Tesla Fleet API SDK</title>
+    <meta
+      name="description"
+      content="Universal TypeScript SDK for the Tesla Fleet API. Runs on Node, browsers, Deno, Bun, and edge runtimes with zero runtime dependencies."
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="tesdk — Tesla Fleet API SDK" />
+    <meta
+      property="og:description"
+      content="Universal TypeScript SDK for the Tesla Fleet API. Zero runtime dependencies, fully typed, runs everywhere."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23171a20'/><text y='72' x='50' text-anchor='middle' font-size='58' font-family='system-ui' font-weight='700' fill='white'>t</text></svg>" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/style.css" />
+
+    <script>
+      // Applied before first paint so the page never flashes the wrong theme.
+      try {
+        const saved = localStorage.getItem('theme')
+        const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      } catch {}
+    </script>
+  </head>
+
+  <body>
+    <a class="sr-only" href="#main">Skip to content</a>
+
+    <header class="hdr">
+      <button class="icon-btn menu-btn" aria-label="Toggle navigation"></button>
+
+      <a class="brand" href="#/">
+        <span class="brand-mark">t</span>
+        tesdk
+        <span class="badge-ver brand-ver">v0.0.0</span>
+      </a>
+
+      <nav class="hdr-nav">
+        <a href="#/quickstart">Quickstart</a>
+        <a href="#/guides">Guides</a>
+        <a href="#/api">API</a>
+        <a href="#/examples">Examples</a>
+      </nav>
+
+      <div class="hdr-right">
+        <button class="search-open" aria-label="Search">
+          <span>Search</span>
+          <span class="kbd">⌘K</span>
+        </button>
+        <button class="icon-btn theme-btn" aria-label="Toggle theme"></button>
+        <a class="icon-btn gh-link" href="#" target="_blank" rel="noopener" aria-label="GitHub"></a>
+        <a class="icon-btn npm-link" href="#" target="_blank" rel="noopener" aria-label="npm"></a>
+      </div>
+    </header>
+
+    <div class="scrim"></div>
+
+    <div class="shell">
+      <aside class="sidebar"></aside>
+      <main class="main" id="main"></main>
+      <aside class="toc"></aside>
+    </div>
+
+    <footer class="foot">
+      <div class="foot-in">
+        <span>MIT licensed</span>
+        <a class="foot-repo" href="#" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://developer.tesla.com/docs/fleet-api" target="_blank" rel="noopener">Fleet API</a>
+        <span class="foot-sep">Not affiliated with Tesla, Inc.</span>
+      </div>
+    </footer>
+
+    <div class="overlay">
+      <div class="search-box">
+        <div class="search-field">
+          <input type="text" placeholder="Search methods, types, and guides…" spellcheck="false" autocomplete="off" />
+        </div>
+        <div class="search-results"></div>
+        <div class="search-foot">
+          <span><span class="kbd">↑</span> <span class="kbd">↓</span> navigate</span>
+          <span><span class="kbd">↵</span> open</span>
+          <span><span class="kbd">esc</span> close</span>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="assets/app.js"></script>
+  </body>
+</html>
