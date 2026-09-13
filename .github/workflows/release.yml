@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          # Points npm at the public registry without writing an auth line.
+          # Authentication comes from the OIDC exchange below, so no
+          # NODE_AUTH_TOKEN is set and no long-lived token exists to steal.
           registry-url: https://registry.npmjs.org
 
       # Trusted publishing requires npm 11.5.1 or later, and Node 22 ships an
