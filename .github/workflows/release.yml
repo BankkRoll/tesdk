@@ -41,9 +41,11 @@ jobs:
       - run: npm ci
       - run: npm run verify
 
+      # Authentication needs no configured secret. npm publishing uses the OIDC
+      # exchange, and the action's github-token defaults to the ephemeral,
+      # repo-scoped token GitHub mints for this run.
       - uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-script: npm run release
           pr-title: 'chore: release'
           commit-message: 'chore: release'
