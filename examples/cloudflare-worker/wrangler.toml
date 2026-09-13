@@ -1,0 +1,38 @@
+name = "tesdk-fleet-monitor"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+# No `compatibility_flags = ["nodejs_compat"]`. tesdk uses only fetch,
+# AbortSignal, URL, and Web Crypto, so the Node compatibility layer is dead
+# weight here — and leaving it off proves the SDK needs no Node built-ins.
+
+[observability]
+enabled = true
+
+# Poll every 15 minutes. Each run costs one billable `vehicle_data` call per
+# online vehicle, so widen this interval before pointing it at a real fleet.
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Refresh tokens must outlive the isolate: Workers are stateless and an
+# in-memory store would lose a rotated refresh token the moment the isolate is
+# evicted, leaving the next invocation unable to authenticate.
+#   wrangler kv namespace create TESLA_KV
+#   wrangler kv namespace create TESLA_KV --preview
+[[kv_namespaces]]
+binding = "TESLA_KV"
+id = "replace-with-the-id-printed-by-kv-namespace-create"
+preview_id = "replace-with-the-preview-id"
+
+[vars]
+TESLA_CLIENT_ID = "replace-with-your-tesla-application-client-id"
+TESLA_REGION = "na"
+TESLA_REDIRECT_URI = "http://localhost:8787/auth/callback"
+# Address of a Vehicle Command Proxy, when one is running. Leave empty to talk
+# to Fleet API directly; unsigned commands then raise SigningRequiredError on
+# vehicles from 2021 onward.
+TESLA_PROXY_URL = ""
+
+# Secrets, never committed:
+#   wrangler secret put TESLA_CLIENT_SECRET
+#   wrangler secret put API_TOKEN

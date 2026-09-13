@@ -1,0 +1,20 @@
+{
+  "name": "@tesdk-examples/code-snippets",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Focused, copy-pasteable snippets for every part of the tesdk surface.",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "tesdk": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}

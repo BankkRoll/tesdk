@@ -1,0 +1,26 @@
+{
+  "name": "@tesdk-examples/node-cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive command-line fleet manager built on tesdk.",
+  "bin": {
+    "tesla": "./src/main.ts"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env --import tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "login": "node --env-file-if-exists=.env --import tsx src/main.ts login"
+  },
+  "dependencies": {
+    "tesdk": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}

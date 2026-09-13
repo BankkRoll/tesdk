@@ -1,0 +1,79 @@
+name: Bug report
+description: Something in the SDK behaves incorrectly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste an access token, refresh token, or private key here.**
+        The `requestId` off an error is safe to share and is what Tesla support asks for.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: The smallest code that shows the problem.
+      render: ts
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: tesdk version
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime
+      options:
+        - Node
+        - Browser
+        - Cloudflare Workers
+        - Vercel Edge
+        - Deno
+        - Bun
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: runtime-version
+    attributes:
+      label: Runtime version
+      placeholder: Node 22.12.0
+
+  - type: dropdown
+    id: region
+    attributes:
+      label: Region
+      options:
+        - na
+        - eu
+        - cn
+        - Not applicable
+
+  - type: input
+    id: request-id
+    attributes:
+      label: Request id
+      description: The `requestId` on the error, from Tesla's `x-txid` header.
+
+  - type: checkboxes
+    id: proxy
+    attributes:
+      label: Setup
+      options:
+        - label: Requests go through a Vehicle Command Proxy
+        - label: I have confirmed this is not a Tesla API outage

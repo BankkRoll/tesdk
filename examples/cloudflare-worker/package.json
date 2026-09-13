@@ -1,0 +1,21 @@
+{
+  "name": "@tesdk-examples/cloudflare-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scheduled Tesla fleet monitor and JSON API running on Cloudflare Workers.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "tesdk": "*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250204.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.128.0"
+  }
+}

@@ -1,0 +1,44 @@
+name: Feature request
+description: A missing endpoint, option, or ergonomic improvement.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Endpoints newer than this SDK are already reachable without a release:
+
+        ```ts
+        await client.commands.send(vin, 'some_new_command', { param: 1 })
+        ```
+
+        A typed wrapper is still worth requesting — this just unblocks you today.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do
+      description: The use case, not just the proposed API.
+    validations:
+      required: true
+
+  - type: input
+    id: endpoint
+    attributes:
+      label: Fleet API endpoint
+      description: Link the relevant page of Tesla's documentation, if there is one.
+      placeholder: https://developer.tesla.com/docs/fleet-api/endpoints/...
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API
+      description: How you would like it to look.
+      render: ts
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I checked the [code snippets](https://github.com/BankkRoll/tesdk/tree/main/examples/code-snippets) for an existing pattern
+        - label: This is not already covered by `commands.send`

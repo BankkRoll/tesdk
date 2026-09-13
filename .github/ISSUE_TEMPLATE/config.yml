@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Tesla Fleet API documentation
+    url: https://developer.tesla.com/docs/fleet-api
+    about: Questions about Tesla's API itself, scopes, or account setup.
+  - name: Security vulnerability
+    url: https://github.com/BankkRoll/tesdk/security/advisories/new
+    about: Report privately. Do not open a public issue.
