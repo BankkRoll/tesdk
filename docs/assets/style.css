@@ -114,39 +114,54 @@ kbd {
   font-feature-settings: 'liga' 0;
 }
 /* ── Header ──────────────────────────────────────────────────────────────── */
+
 .hdr {
   position: sticky;
   top: 0;
   z-index: 60;
-  height: var(--header);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 20px;
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: saturate(180%) blur(16px);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--border);
 }
+
+.hdr-in {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--header);
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 9px;
+  flex-shrink: 0;
   font-weight: 600;
   font-size: 15px;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
   white-space: nowrap;
 }
+
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
   background: var(--accent);
   color: var(--accent-fg);
-  border-radius: 5px;
-  font-size: 12px;
-  font-weight: 700;
+  border-radius: 6px;
 }
+
+.brand-mark svg {
+  width: 15px;
+  height: 15px;
+}
+
 .badge-ver {
   padding: 2px 7px;
   background: var(--bg-subtle);
@@ -154,58 +169,107 @@ kbd {
   border-radius: 100px;
   color: var(--text-muted);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 500;
+  letter-spacing: 0;
 }
+
 .hdr-nav {
   display: flex;
-  gap: 4px;
-  margin-left: 8px;
+  gap: 2px;
+  margin-left: 14px;
+  min-width: 0;
 }
+
 .hdr-nav a {
-  padding: 6px 11px;
+  position: relative;
+  padding: 7px 11px;
   border-radius: var(--radius);
   color: var(--text-muted);
   font-size: 14px;
-  transition: color 0.12s, background 0.12s;
+  white-space: nowrap;
+  transition:
+    color 0.14s ease,
+    background 0.14s ease;
 }
+
 .hdr-nav a:hover {
   background: var(--surface-hover);
   color: var(--text);
 }
+
+.hdr-nav a.active {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Underline sits on the header border rather than the link, so it reads as a
+   tab indicator instead of a text decoration. */
+.hdr-nav a.active::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  bottom: -17px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px 2px 0 0;
+}
+
 .hdr-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-left: auto;
+  min-width: 0;
 }
+
+.hdr-icons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 6px;
+  margin-left: 2px;
+  border-left: 1px solid var(--border);
+}
+
 .icon-btn {
   display: grid;
   place-items: center;
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
   border-radius: var(--radius);
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.14s ease,
+    color 0.14s ease;
 }
+
 .icon-btn:hover {
   background: var(--surface-hover);
   color: var(--text);
 }
+
+.icon-btn:active {
+  transform: scale(0.94);
+}
+
 .icon-btn svg {
   width: 17px;
   height: 17px;
 }
+
 .search-open {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 200px;
-  padding: 0 10px;
+  min-width: 216px;
   height: 32px;
+  padding: 0 8px 0 10px;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -213,31 +277,47 @@ kbd {
   font-family: var(--sans);
   font-size: 13px;
   cursor: pointer;
-  transition: border-color 0.12s;
+  transition:
+    border-color 0.14s ease,
+    background 0.14s ease;
 }
+
 .search-open:hover {
+  background: var(--surface);
   border-color: var(--border-strong);
+  color: var(--text-muted);
 }
+
 .search-open svg {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
 }
-.search-open .kbd {
-  margin-left: auto;
+
+.search-open-label {
+  flex: 1;
+  text-align: left;
 }
+
 .kbd {
-  padding: 1px 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px 5px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 4px;
+  color: var(--text-faint);
   font-family: var(--mono);
   font-size: 10px;
-  color: var(--text-faint);
+  line-height: 1.3;
 }
+
 .menu-btn {
   display: none;
+  margin-left: -6px;
 }
+
 /* ── Layout ──────────────────────────────────────────────────────────────── */
 .shell {
   display: grid;
@@ -801,138 +881,390 @@ tbody tr:hover {
   font-size: 11.5px;
 }
 /* ── Footer ──────────────────────────────────────────────────────────────── */
+
 .foot {
-  padding: 32px 24px;
+  margin-top: 80px;
+  background: var(--bg-subtle);
   border-top: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 13px;
 }
+
 .foot-in {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.4fr) minmax(0, 2.6fr);
+  gap: 56px;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 56px 24px 44px;
+}
+
+.foot-brand .brand {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.foot-tag {
+  max-width: 300px;
+  margin: 0 0 20px;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.foot-social {
+  display: flex;
+  gap: 4px;
+  margin-left: -6px;
+}
+
+.foot-social .icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid transparent;
+}
+
+.foot-social .icon-btn:hover {
+  border-color: var(--border);
+}
+
+.foot-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.foot-col h3 {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.foot-col a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  transition: color 0.14s ease;
+}
+
+.foot-col a:hover {
+  color: var(--text);
+}
+
+/* Marks links that leave the docs site. */
+.ext {
+  display: inline-flex;
+  width: 11px;
+  height: 11px;
+  opacity: 0.55;
+}
+
+.ext svg {
+  width: 100%;
+  height: 100%;
+}
+
+.foot-col a:hover .ext {
+  opacity: 1;
+}
+
+.foot-bar {
+  border-top: 1px solid var(--border);
+}
+
+.foot-bar-in {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   max-width: var(--max);
   margin: 0 auto;
+  padding: 18px 24px;
+  color: var(--text-faint);
+  font-size: 12.5px;
 }
-.foot a {
+
+.foot-bar-in a {
   color: var(--text-muted);
+  transition: color 0.14s ease;
 }
-.foot a:hover {
+
+.foot-bar-in a:hover {
   color: var(--text);
 }
-.foot-sep {
+
+.foot-dot {
+  color: var(--border-strong);
+}
+
+.foot-disclaimer {
   margin-left: auto;
 }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 1180px) {
+
+/* Table of contents is the first thing to go: it is an aid, not content. */
+@media (max-width: 1240px) {
   .shell {
     grid-template-columns: var(--sidebar) minmax(0, 1fr);
-    gap: 32px;
+    gap: 36px;
   }
+
   .toc {
     display: none;
   }
 }
-@media (max-width: 860px) {
-  .shell {
-    grid-template-columns: minmax(0, 1fr);
+
+/* Narrow desktop: shrink the search field before touching navigation. */
+@media (max-width: 1080px) {
+  .search-open {
+    min-width: 150px;
+  }
+
+  .foot-in {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 44px 24px 36px;
+  }
+
+  .foot-tag {
+    max-width: 460px;
+  }
+}
+
+/* Tablet: primary nav folds into the sidebar drawer. */
+@media (max-width: 900px) {
+  .hdr-in {
     padding: 0 18px;
   }
+
   .menu-btn {
     display: grid;
   }
+
   .hdr-nav {
     display: none;
   }
+
+  .brand-ver {
+    display: none;
+  }
+
   .search-open {
     min-width: 0;
     width: 32px;
     padding: 0;
     justify-content: center;
   }
-  .search-open span,
+
+  .search-open-label,
   .search-open .kbd {
     display: none;
   }
+
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 18px;
+  }
+
+  /* Off-canvas drawer. Kept in the DOM so focus order and the active state
+     survive the breakpoint change. */
   .sidebar {
     position: fixed;
     top: var(--header);
     left: 0;
     z-index: 55;
-    width: 280px;
-    height: calc(100vh - var(--header));
+    width: min(300px, 84vw);
+    height: calc(100dvh - var(--header));
     padding: 20px 16px 64px;
     background: var(--bg);
     border-right: 1px solid var(--border);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
   }
+
   .sidebar.open {
     transform: none;
     box-shadow: var(--shadow-lg);
   }
+
   .main {
-    padding: 28px 0 90px;
+    padding: 28px 0 80px;
   }
+
   .hero {
-    padding: 36px 0 32px;
+    padding: 40px 0 34px;
   }
+
   .hero h1 {
-    font-size: 36px;
+    font-size: 40px;
   }
+
   .hero .lede {
-    font-size: 16px;
+    font-size: 16.5px;
   }
+
   .main h1 {
-    font-size: 30px;
+    font-size: 32px;
   }
+
   .main h2 {
-    font-size: 22px;
-    margin-top: 44px;
+    margin-top: 46px;
+    font-size: 23px;
   }
-  .stats {
+
+  .foot-cols {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
   }
+}
+
+/* Phone: single-column everything, larger touch targets. */
+@media (max-width: 620px) {
+  .hdr-in {
+    gap: 6px;
+    padding: 0 14px;
+  }
+
+  .brand-name {
+    font-size: 15px;
+  }
+
+  .hdr-icons {
+    padding-left: 4px;
+    border-left: none;
+  }
+
+  /* npm is the least essential of the three at this width. */
+  .npm-link {
+    display: none;
+  }
+
+  .shell {
+    padding: 0 16px;
+  }
+
+  .hero {
+    padding: 32px 0 28px;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+    letter-spacing: -0.03em;
+  }
+
+  .hero .lede {
+    font-size: 15.5px;
+  }
+
+  .hero-actions .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .main h1 {
+    font-size: 27px;
+  }
+
+  .main h2 {
+    font-size: 21px;
+  }
+
+  .stats {
+    gap: 20px 28px;
+  }
+
+  .stat-n {
+    font-size: 23px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
   .api-meta-row {
     grid-template-columns: 1fr;
     gap: 2px;
   }
-}
-@media (max-width: 520px) {
-  .hero h1 {
-    font-size: 30px;
+
+  .code pre {
+    padding: 14px;
+    font-size: 12.5px;
   }
-  .grid {
-    grid-template-columns: 1fr;
+
+  /* Copy buttons cannot rely on hover on touch devices. */
+  .code-copy {
+    opacity: 1;
   }
+
+  .foot-in {
+    padding: 36px 16px 28px;
+    gap: 32px;
+  }
+
+  .foot-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 20px;
+  }
+
+  .foot-bar-in {
+    padding: 16px;
+  }
+
+  .foot-disclaimer {
+    width: 100%;
+    margin-left: 0;
+    padding-top: 4px;
+  }
+
   .sr-d {
     display: none;
   }
+
+  .overlay {
+    padding: 8vh 12px 12px;
+  }
 }
+
+@media (max-width: 400px) {
+  .foot-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
 .scrim {
   position: fixed;
   inset: var(--header) 0 0;
   z-index: 50;
   display: none;
-  background: rgb(0 0 0 / 40%);
+  background: rgb(0 0 0 / 44%);
+  backdrop-filter: blur(2px);
 }
+
 .scrim.open {
   display: block;
 }
-@media (min-width: 861px) {
+
+@media (min-width: 901px) {
   .scrim {
     display: none !important;
   }
 }
+
 ::selection {
   background: color-mix(in srgb, var(--blue) 24%, transparent);
 }
+
 :focus-visible {
   outline: 2px solid var(--blue);
   outline-offset: 2px;
   border-radius: 3px;
 }
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -942,4 +1274,60 @@ tbody tr:hover {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Skip link becomes visible only when focused by keyboard. */
+.sr-only:focus-visible {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 200;
+  width: auto;
+  height: auto;
+  padding: 9px 14px;
+  clip: auto;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+@media print {
+  .hdr,
+  .sidebar,
+  .toc,
+  .foot,
+  .overlay,
+  .scrim {
+    display: none !important;
+  }
+
+  .shell {
+    display: block;
+    padding: 0;
+  }
+}
+
+/* ── Icon sizing corrections ─────────────────────────────────────────────── */
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: -1px;
+}
+
+.btn-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Sidebar owns its own scroll region; the extra bottom padding keeps the last
+   link clear of the viewport edge on short screens. */
+.sidebar {
+  overscroll-behavior: contain;
+  padding-bottom: 96px;
+}
+
+.toc {
+  overscroll-behavior: contain;
 }

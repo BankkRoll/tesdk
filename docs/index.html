@@ -1,105 +1,160 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>tesdk — Tesla Fleet API SDK</title>
-    <meta
-      name="description"
-      content="Universal TypeScript SDK for the Tesla Fleet API. Runs on Node, browsers, Deno, Bun, and edge runtimes with zero runtime dependencies."
-    />
 
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="tesdk — Tesla Fleet API SDK" />
-    <meta
-      property="og:description"
-      content="Universal TypeScript SDK for the Tesla Fleet API. Zero runtime dependencies, fully typed, runs everywhere."
-    />
-    <meta name="twitter:card" content="summary_large_image" />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tesdk — Tesla Fleet API SDK</title>
+  <meta name="description"
+    content="Universal TypeScript SDK for the Tesla Fleet API. Runs on Node, browsers, Deno, Bun, and edge runtimes with zero runtime dependencies." />
 
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23171a20'/><text y='72' x='50' text-anchor='middle' font-size='58' font-family='system-ui' font-weight='700' fill='white'>t</text></svg>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="tesdk — Tesla Fleet API SDK" />
+  <meta property="og:description"
+    content="Universal TypeScript SDK for the Tesla Fleet API. Zero runtime dependencies, fully typed, runs everywhere." />
+  <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23171a20'/><text y='72' x='50' text-anchor='middle' font-size='58' font-family='system-ui' font-weight='700' fill='white'>t</text></svg>" />
 
-    <script>
-      // Applied before first paint so the page never flashes the wrong theme.
-      try {
-        const saved = localStorage.getItem('theme')
-        const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches
-        if (saved === 'dark' || (!saved && prefersDark)) {
-          document.documentElement.classList.add('dark')
-        }
-      } catch {}
-    </script>
-  </head>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="assets/style.css" />
 
-  <body>
-    <a class="sr-only" href="#main">Skip to content</a>
+  <script>
+    // Applied before first paint so the page never flashes the wrong theme.
+    try {
+      const saved = localStorage.getItem('theme')
+      const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark')
+      }
+    } catch { }
+  </script>
+</head>
 
-    <header class="hdr">
-      <button class="icon-btn menu-btn" aria-label="Toggle navigation"></button>
+<body>
+  <a class="sr-only" href="#main">Skip to content</a>
 
-      <a class="brand" href="#/">
-        <span class="brand-mark">t</span>
-        tesdk
+  <header class="hdr">
+    <div class="hdr-in">
+      <button class="icon-btn menu-btn" aria-label="Open navigation" aria-expanded="false"></button>
+
+      <a class="brand" href="#/" aria-label="tesdk home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">tesdk</span>
         <span class="badge-ver brand-ver">v0.0.0</span>
       </a>
 
-      <nav class="hdr-nav">
-        <a href="#/quickstart">Quickstart</a>
-        <a href="#/guides">Guides</a>
-        <a href="#/api">API</a>
-        <a href="#/examples">Examples</a>
+      <nav class="hdr-nav" aria-label="Primary">
+        <a href="#/quickstart" data-route="/quickstart">Quickstart</a>
+        <a href="#/guides" data-route="/guides">Guides</a>
+        <a href="#/api" data-route="/api">API</a>
+        <a href="#/examples" data-route="/examples">Examples</a>
       </nav>
 
       <div class="hdr-right">
-        <button class="search-open" aria-label="Search">
-          <span>Search</span>
+        <button class="search-open" aria-label="Search documentation">
+          <span class="search-open-label">Search</span>
           <span class="kbd">⌘K</span>
         </button>
-        <button class="icon-btn theme-btn" aria-label="Toggle theme"></button>
-        <a class="icon-btn gh-link" href="#" target="_blank" rel="noopener" aria-label="GitHub"></a>
-        <a class="icon-btn npm-link" href="#" target="_blank" rel="noopener" aria-label="npm"></a>
+
+        <div class="hdr-icons">
+          <button class="icon-btn theme-btn" aria-label="Toggle colour theme"></button>
+          <a class="icon-btn gh-link" href="#" target="_blank" rel="noopener" aria-label="View on GitHub"
+            title="GitHub"></a>
+          <a class="icon-btn npm-link" href="#" target="_blank" rel="noopener" aria-label="View on npm" title="npm"></a>
+        </div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <div class="scrim"></div>
+  <div class="scrim"></div>
 
-    <div class="shell">
-      <aside class="sidebar"></aside>
-      <main class="main" id="main"></main>
-      <aside class="toc"></aside>
+  <div class="shell">
+    <aside class="sidebar"></aside>
+    <main class="main" id="main"></main>
+    <aside class="toc"></aside>
+  </div>
+
+  <footer class="foot">
+    <div class="foot-in">
+      <div class="foot-brand">
+        <a class="brand" href="#/">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name">tesdk</span>
+        </a>
+        <p class="foot-tag">
+          Universal TypeScript SDK for the Tesla Fleet API. Zero runtime dependencies.
+        </p>
+        <div class="foot-social">
+          <a class="icon-btn foot-gh" href="#" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub"></a>
+          <a class="icon-btn foot-npm" href="#" target="_blank" rel="noopener" aria-label="npm" title="npm"></a>
+          <a class="icon-btn foot-issues" href="#" target="_blank" rel="noopener" aria-label="Report an issue"
+            title="Issues"></a>
+        </div>
+      </div>
+
+      <nav class="foot-cols" aria-label="Footer">
+        <div class="foot-col">
+          <h3>Documentation</h3>
+          <a href="#/">Overview</a>
+          <a href="#/quickstart">Quickstart</a>
+          <a href="#/auth">Authentication</a>
+          <a href="#/guides">Guides</a>
+          <a href="#/errors">Errors</a>
+        </div>
+
+        <div class="foot-col">
+          <h3>Reference</h3>
+          <a href="#/api">API overview</a>
+          <a href="#/api/vehicles">Vehicles</a>
+          <a href="#/api/commands">Commands</a>
+          <a href="#/api/energy">Energy</a>
+          <a href="#/types">Types</a>
+        </div>
+
+        <div class="foot-col">
+          <h3>Resources</h3>
+          <a href="#/examples">Examples</a>
+          <a class="foot-repo" href="#" target="_blank" rel="noopener">GitHub<span class="ext"></span></a>
+          <a class="foot-npm-link" href="#" target="_blank" rel="noopener">npm<span class="ext"></span></a>
+          <a class="foot-changelog" href="#" target="_blank" rel="noopener">Changelog<span class="ext"></span></a>
+          <a href="https://developer.tesla.com/docs/fleet-api" target="_blank" rel="noopener">Fleet API docs<span
+              class="ext"></span></a>
+        </div>
+      </nav>
     </div>
 
-    <footer class="foot">
-      <div class="foot-in">
+    <div class="foot-bar">
+      <div class="foot-bar-in">
         <span>MIT licensed</span>
-        <a class="foot-repo" href="#" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://developer.tesla.com/docs/fleet-api" target="_blank" rel="noopener">Fleet API</a>
-        <span class="foot-sep">Not affiliated with Tesla, Inc.</span>
-      </div>
-    </footer>
-
-    <div class="overlay">
-      <div class="search-box">
-        <div class="search-field">
-          <input type="text" placeholder="Search methods, types, and guides…" spellcheck="false" autocomplete="off" />
-        </div>
-        <div class="search-results"></div>
-        <div class="search-foot">
-          <span><span class="kbd">↑</span> <span class="kbd">↓</span> navigate</span>
-          <span><span class="kbd">↵</span> open</span>
-          <span><span class="kbd">esc</span> close</span>
-        </div>
+        <span class="foot-dot" aria-hidden="true">·</span>
+        <span>Built by
+          <a class="foot-author" href="https://github.com/BankkRoll" target="_blank" rel="noopener">BankkRoll</a></span>
+        <span class="foot-disclaimer">Not affiliated with Tesla, Inc.</span>
       </div>
     </div>
+  </footer>
 
-    <script type="module" src="assets/app.js"></script>
-  </body>
+  <div class="overlay">
+    <div class="search-box">
+      <div class="search-field">
+        <input type="text" placeholder="Search methods, types, and guides…" spellcheck="false" autocomplete="off" />
+      </div>
+      <div class="search-results"></div>
+      <div class="search-foot">
+        <span><span class="kbd">↑</span> <span class="kbd">↓</span> navigate</span>
+        <span><span class="kbd">↵</span> open</span>
+        <span><span class="kbd">esc</span> close</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="assets/app.js"></script>
+</body>
+
 </html>

@@ -10,6 +10,9 @@
 /** @type {any} */
 let API = null
 
+/** Closes the mobile drawer. Assigned once the chrome is wired. */
+let closeDrawer = () => {}
+
 const $ = (sel, root = document) => root.querySelector(sel)
 
 /** Escapes text for safe interpolation into HTML. */
@@ -18,6 +21,50 @@ const esc = (s = '') =>
     /[&<>"']/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
   )
+
+/**
+ * Inline SVG icons.
+ *
+ * Inlined rather than sprited or fetched so the header paints with the first
+ * frame: an icon font or external sprite would flash empty on a cold load.
+ * All stroked icons share a 24-unit grid and 2px stroke so they align
+ * optically at the 17px render size.
+ */
+const ICON = {
+  logo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M12 6v13"/></svg>',
+
+  search:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+
+  check:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>',
+
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>',
+
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>',
+
+  github:
+    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5a10.5 10.5 0 0 0-3.3 20.5c.5.1.7-.2.7-.5v-1.9c-2.9.6-3.5-1.4-3.5-1.4-.5-1.2-1.2-1.5-1.2-1.5-.9-.7.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.3-.3-4.8-1.2-4.8-5.2 0-1.1.4-2.1 1-2.8-.1-.3-.4-1.3.1-2.7 0 0 .9-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.7.7 1 1.7 1 2.8 0 4-2.5 4.9-4.8 5.2.4.3.7 1 .7 2v3c0 .3.2.6.7.5A10.5 10.5 0 0 0 12 1.5Z"/></svg>',
+
+  npm:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="m3.5 7.5 8.5-4.5 8.5 4.5v9L12 21l-8.5-4.5v-9Z"/>' +
+    '<path d="m3.5 7.5 8.5 4.5 8.5-4.5M12 21v-9"/>' +
+    '</svg>',
+
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+
+  close:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+
+  issue:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16.2v.1"/></svg>',
+
+  external:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h6v6M19 5l-8 8M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4"/></svg>',
+}
 
 /** Renders a limited Markdown subset: inline code, bold, links, paragraphs. */
 function md(text = '') {
@@ -82,16 +129,6 @@ function codeBlock(code, label = '') {
   </div>`
 }
 
-const ICON = {
-  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
-  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
-  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 13 4 4L19 7"/></svg>',
-  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
-  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>',
-  github: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5a10.5 10.5 0 0 0-3.3 20.5c.5.1.7-.2.7-.5v-2c-2.9.6-3.5-1.3-3.5-1.3-.5-1.2-1.2-1.5-1.2-1.5-.9-.7.1-.7.1-.7 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.3-.3-4.8-1.2-4.8-5.2 0-1.1.4-2 1-2.8-.1-.3-.4-1.3.1-2.7 0 0 .9-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.7.8 1 1.7 1 2.8 0 4-2.5 4.9-4.8 5.2.4.3.7 1 .7 2v3c0 .3.2.6.7.5A10.5 10.5 0 0 0 12 1.5Z"/></svg>',
-  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
-  npm: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 6h20v11h-10v2H7v-2H2V6Zm2 2v7h3V10h2v5h2V8H4Zm9 0v7h2v-2h3V8h-5Zm2 2h1v3h-1v-3Zm4-2v7h2V10h1v5h2V8h-5Z"/></svg>',
-}
 
 /* ── Pages ─────────────────────────────────────────────────────────────── */
 
@@ -106,7 +143,7 @@ function pageHome() {
     <div class="hero-actions">
       <a class="btn btn-primary" href="#/quickstart">Get started</a>
       <a class="btn btn-ghost" href="#/api">API reference</a>
-      <a class="btn btn-ghost" href="${p.repository}" target="_blank" rel="noopener">${ICON.github} GitHub</a>
+      <a class="btn btn-ghost" href="${p.repository}" target="_blank" rel="noopener"><span class="btn-icon">${ICON.github}</span>GitHub</a>
     </div>
     <div class="stats">
       <div><div class="stat-n">${s.methods}</div><div class="stat-l">typed methods</div></div>
@@ -682,8 +719,12 @@ function route() {
   document.title = `${page.title} · ${API.package.name}`
   window.scrollTo({ top: 0 })
 
-  $('.sidebar').classList.remove('open')
-  $('.scrim').classList.remove('open')
+  closeDrawer(false)
+
+  const section = '/' + (hash.split('/')[1] ?? '')
+  for (const a of document.querySelectorAll('.hdr-nav a')) {
+    a.classList.toggle('active', a.dataset.route === section)
+  }
 
   wireCopy()
   wireScrollSpy()
@@ -838,41 +879,108 @@ function wireSearch() {
 
 /* ── Boot ──────────────────────────────────────────────────────────────── */
 
-async function boot() {
-  API = await fetch('assets/api.json').then((r) => r.json())
-
-  $('.brand-ver').textContent = `v${API.package.version}`
-  $('.gh-link').href = API.package.repository
-  $('.npm-link').href = `https://www.npmjs.com/package/${API.package.name}`
-  $('.foot-repo').href = API.package.repository
-
-  const themeBtn = $('.theme-btn')
-  const paintTheme = () => {
-    themeBtn.innerHTML = document.documentElement.classList.contains('dark') ? ICON.sun : ICON.moon
+/** Paints every static icon in the chrome once, at startup. */
+function paintChrome() {
+  const set = (sel, html) => {
+    const el = $(sel)
+    if (el) el.innerHTML = html
   }
-  themeBtn.addEventListener('click', () => {
-    const dark = document.documentElement.classList.toggle('dark')
-    localStorage.setItem('theme', dark ? 'dark' : 'light')
-    paintTheme()
-  })
-  paintTheme()
 
-  $('.menu-btn').innerHTML = ICON.menu
-  $('.menu-btn').addEventListener('click', () => {
-    $('.sidebar').classList.toggle('open')
-    $('.scrim').classList.toggle('open')
-  })
-  $('.scrim').addEventListener('click', () => {
-    $('.sidebar').classList.remove('open')
-    $('.scrim').classList.remove('open')
-  })
+  set('.brand-mark', ICON.logo)
+  set('.menu-btn', ICON.menu)
+  set('.gh-link', ICON.github)
+  set('.npm-link', ICON.npm)
+  set('.foot-gh', ICON.github)
+  set('.foot-npm', ICON.npm)
+  set('.foot-issues', ICON.issue)
+
+  for (const el of document.querySelectorAll('.foot-brand .brand-mark')) el.innerHTML = ICON.logo
+  for (const el of document.querySelectorAll('.ext')) el.innerHTML = ICON.external
 
   $('.search-open').insertAdjacentHTML('afterbegin', ICON.search)
   $('.search-field').insertAdjacentHTML('afterbegin', ICON.search)
-  $('.gh-link').innerHTML = ICON.github
-  $('.npm-link').innerHTML = ICON.npm
+}
 
+/** Points every chrome link at the repository read from api.json. */
+function wireLinks() {
+  const { repository, name } = API.package
+  const npm = `https://www.npmjs.com/package/${name}`
+
+  const href = (sel, url) => {
+    const el = $(sel)
+    if (el) el.href = url
+  }
+
+  href('.gh-link', repository)
+  href('.npm-link', npm)
+  href('.foot-gh', repository)
+  href('.foot-npm', npm)
+  href('.foot-npm-link', npm)
+  href('.foot-repo', repository)
+  href('.foot-issues', `${repository}/issues`)
+  href('.foot-changelog', `${repository}/blob/main/CHANGELOG.md`)
+
+  $('.brand-ver').textContent = `v${API.package.version}`
+}
+
+/** Toggles the mobile navigation drawer and keeps ARIA state in sync. */
+function wireDrawer() {
+  const btn = $('.menu-btn')
+  const sidebar = $('.sidebar')
+  const scrim = $('.scrim')
+
+  const setOpen = (open) => {
+    sidebar.classList.toggle('open', open)
+    scrim.classList.toggle('open', open)
+    btn.setAttribute('aria-expanded', String(open))
+    btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation')
+    btn.innerHTML = open ? ICON.close : ICON.menu
+  }
+
+  btn.addEventListener('click', () => setOpen(!sidebar.classList.contains('open')))
+  scrim.addEventListener('click', () => setOpen(false))
+
+  // Escape closes the drawer only when the search overlay is not on top of it.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('.overlay').classList.contains('open')) setOpen(false)
+  })
+
+  return setOpen
+}
+
+/** Applies the saved or system theme and wires the toggle. */
+function wireTheme() {
+  const btn = $('.theme-btn')
+
+  const paint = () => {
+    const dark = document.documentElement.classList.contains('dark')
+    btn.innerHTML = dark ? ICON.sun : ICON.moon
+    btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme')
+  }
+
+  btn.addEventListener('click', () => {
+    const dark = document.documentElement.classList.toggle('dark')
+    try {
+      localStorage.setItem('theme', dark ? 'dark' : 'light')
+    } catch {
+      // Private browsing can reject writes; the theme still applies for this
+      // session, it simply is not remembered.
+    }
+    paint()
+  })
+
+  paint()
+}
+
+async function boot() {
+  API = await fetch('assets/api.json').then((r) => r.json())
+
+  paintChrome()
+  wireLinks()
+  wireTheme()
+  closeDrawer = wireDrawer()
   wireSearch()
+
   window.addEventListener('hashchange', route)
   route()
 }
