@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
 
+# Least privilege by default. Jobs opt into more only where they need it.
 permissions:
   contents: read
 
@@ -16,11 +17,18 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Third-party actions are pinned to a commit SHA rather than a tag: a tag
+      # is a movable pointer, and the 2025 tj-actions compromise moved dozens of
+      # published tags onto one malicious commit in a single day.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
+
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
@@ -37,14 +45,46 @@ jobs:
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+
       - run: npm ci
       - run: npm run build
+
+      # Proves the published entry points resolve under both module systems on
+      # every supported Node major.
       - name: import as ESM
         run: node -e "import('./dist/index.js').then(m => { if (!m.TeslaClient) process.exit(1) })"
       - name: require as CJS
         run: node -e "if (!require('./dist/index.cjs').TeslaClient) process.exit(1)"
+
+  examples:
+    name: examples typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # The examples resolve the SDK through the workspace link, so a breaking
+      # change to the public surface fails here before it reaches a release.
+      - name: typecheck every example
+        run: |
+          for dir in examples/*/; do
+            echo "==> ${dir}"
+            npm --prefix "${dir}" run typecheck
+          done
