@@ -1331,3 +1331,143 @@ tbody tr:hover {
 .toc {
   overscroll-behavior: contain;
 }
+
+/* ── Page actions ────────────────────────────────────────────────────────── */
+
+.pg-actions {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+.pg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) 0 0 var(--radius);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.14s ease,
+    color 0.14s ease,
+    border-color 0.14s ease;
+}
+
+.pg-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.pg-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.pg-copy.done {
+  color: var(--green);
+  border-color: color-mix(in srgb, var(--green) 40%, var(--border));
+}
+
+.pg-menu-wrap {
+  position: relative;
+}
+
+.pg-more {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+  border-left: none;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.pg-more svg {
+  width: 13px;
+  height: 13px;
+}
+
+.pg-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 40;
+  min-width: 222px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.pg-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+.pg-item:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.pg-item svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* The trailing external-link glyph is a hint, not a peer of the leading icon. */
+.pg-item svg:last-child {
+  width: 11px;
+  height: 11px;
+  margin-left: auto;
+  opacity: 0.5;
+}
+
+.pg-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}
+
+/* The menu would overflow the viewport if it opened leftward on a phone. */
+@media (max-width: 620px) {
+  .pg-menu {
+    left: auto;
+    right: 0;
+  }
+}
+
+/* Menu entries are controls, not prose links, so they opt out of the
+   in-content link styling the main column applies to anchors. */
+.main .pg-item,
+.main .pg-item:hover {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.main .pg-item:hover {
+  color: var(--text);
+}

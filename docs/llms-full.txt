@@ -1,0 +1,2602 @@
+# @bankkroll/tesdk — complete documentation
+
+> Version 0.1.0. Generated from the shipped type declarations.
+
+---
+
+# @bankkroll/tesdk
+
+> Universal TypeScript SDK for the Tesla Fleet API — runs on Node, browsers, and edge runtimes.
+
+Version 0.1.0. 122 typed methods across 10
+namespaces, zero runtime dependencies, MIT licensed.
+
+## Install
+
+```sh
+npm install @bankkroll/tesdk
+```
+
+```ts
+import { TeslaClient } from '@bankkroll/tesdk'
+
+const client = new TeslaClient({ region: 'na', accessToken: process.env.TESLA_TOKEN })
+
+const [vehicle] = await client.vehicles.list()
+const data = await client.vehicles.data(vehicle.vin, { endpoints: ['charge_state'] })
+
+console.log(`${data.charge_state?.battery_level}%`)
+```
+
+## Why this SDK
+
+- **Runs everywhere.** Web Standards only: fetch, AbortSignal, URL, Web Crypto.
+  Node 20+, browsers, Deno, Bun, Cloudflare Workers, Vercel Edge.
+- **Zero runtime dependencies.**
+- **Fully typed.** Every endpoint, payload, and error. No `any`.
+- **Safe commands.** Commands with a visible physical effect are never retried,
+  so a transient failure cannot honk the horn twice.
+- **Honest about Tesla.** Regional token binding, sleeping vehicles, and command
+  signing are modelled rather than hidden.
+
+## Namespaces
+
+- `client.vehicles` (19 methods) — Listing, live data, wake handling, drivers, and share invites.
+- `client.commands` (47 methods) — Every actuating command, from locks to navigation.
+- `client.energy` (12 methods) — Powerwall, Solar, and Wall Connector sites.
+- `client.charging` (3 methods) — Charging history, sessions, and PDF invoices.
+- `client.telemetry` (5 methods) — Fleet Telemetry streaming configuration.
+- `client.partner` (4 methods) — Partner registration and telemetry diagnostics.
+- `client.fleet` (7 methods) — Specs, options, pricing, warranty, and eligibility.
+- `client.user` (4 methods) — Account profile, region discovery, and orders.
+- `client.ocpi` (6 methods) — Tesla Charging API locations and tariffs (OCPI 2.2.1).
+- `client.oauth` (6 methods) — Token flows and credential lifecycle.
+
+---
+
+# Quickstart
+
+> From an empty project to reading live vehicle data.
+
+## 1. Install
+
+```sh
+npm install @bankkroll/tesdk
+```
+
+## 2. Register an application
+
+Create an application at https://developer.tesla.com. You need a client ID, a
+client secret for confidential clients, and at least one allowed redirect URI.
+
+Registration is per-region: a token minted for one region is rejected by the
+others, and so is a partner registration.
+
+## 3. Authorize a user
+
+```ts
+import { TeslaClient, createPkcePair, randomString } from '@bankkroll/tesdk'
+
+const client = new TeslaClient({
+  region: 'na',
+  clientId: process.env.TESLA_CLIENT_ID,
+  clientSecret: process.env.TESLA_CLIENT_SECRET,
+  redirectUri: 'https://example.com/callback',
+})
+
+const pkce = await createPkcePair()
+const state = randomString()
+
+// Persist both against the user's session before redirecting.
+const url = client.oauth.authorizeUrl({
+  scopes: ['vehicle_device_data', 'vehicle_cmds'],
+  state,
+  pkce,
+})
+```
+
+Then exchange the code your callback receives:
+
+```ts
+const tokens = await client.oauth.exchangeCode({ code, codeVerifier: pkce.verifier })
+```
+
+## 4. Read vehicle data
+
+```ts
+const vehicles = await client.vehicles.list()
+
+// Requesting only the subtrees you need keeps the payload small and
+// shortens how long the vehicle stays awake.
+const data = await client.vehicles.data(vehicles[0].vin, {
+  endpoints: ['charge_state', 'climate_state'],
+})
+```
+
+## 5. Send a command
+
+```ts
+await client.vehicles.withWake(vin, () => client.commands.doorLock(vin))
+```
+
+`withWake` runs the operation and, if the vehicle turns out to be asleep, wakes it
+and retries exactly once.
+
+---
+
+# Authentication
+
+> Three token types, each for a different relationship between your application
+> and the vehicles it reaches.
+
+| Token | Represents | Grant |
+| --- | --- | --- |
+| Third-party | A person who granted your app access | `authorization_code` + PKCE |
+| Partner | Your application itself | `client_credentials` |
+| Third-party business | A business fleet | `client_credentials` + `auth_code` |
+
+## Authorization code with PKCE
+
+```ts
+const pkce = await createPkcePair()
+const state = randomString()
+
+// Persist both against the user's session before redirecting.
+const url = client.oauth.authorizeUrl({ scopes: ['vehicle_device_data'], state, pkce })
+
+// In your callback, after checking that state matches:
+const tokens = await client.oauth.exchangeCode({ code, codeVerifier: pkce.verifier })
+```
+
+## Partner tokens
+
+Partner tokens represent the application rather than a user. Required for every
+`client.partner` endpoint and for the partner-only `vehicle_specs` and
+`vehicle_pricing_info` scopes. They carry no user context, so `client.user`
+rejects them.
+
+```ts
+await client.oauth.clientCredentials(['openid', 'vehicle_specs'])
+await client.partner.register('example.com')
+```
+
+## Business tokens
+
+No browser redirect: a business administrator grants consent once in Tesla for
+Business and hands over an authorization code.
+
+```ts
+await client.oauth.businessToken(authCode, ['vehicle_device_data', 'vehicle_cmds'])
+```
+
+## Refresh
+
+Give the client a token set and it refreshes on demand, one minute before expiry.
+Concurrent requests share a single in-flight refresh rather than stampeding the
+token endpoint.
+
+```ts
+const client = new TeslaClient({
+  clientId,
+  clientSecret,
+  tokens: { accessToken, refreshToken, expiresAt },
+})
+```
+
+## Token stores
+
+```ts
+import { createTokenStore } from '@bankkroll/tesdk'
+
+const tokenStore = createTokenStore({
+  get: () => db.tokens.find(userId),
+  set: (tokens) => db.tokens.upsert(userId, tokens),
+})
+```
+
+A refresh token grants the same access as a password until revoked. Encrypt it at
+rest, and never log it.
+
+## Scopes
+
+| Scope | Grants |
+| --- | --- |
+| `openid` | Sign in with Tesla |
+| `offline_access` | A refresh token |
+| `user_data` | Contact information, address, profile |
+| `vehicle_device_data` | Live vehicle data, service history, upgrades |
+| `vehicle_location` | Precise and coarse location |
+| `vehicle_cmds` | Driver management, unlock, wake, remote start |
+| `vehicle_charging_cmds` | Charging history and start, stop, schedule |
+| `energy_device_data` | Energy live status, site info, history |
+| `energy_cmds` | Backup reserve, operation mode, storm mode |
+| `vehicle_specs` | Detailed specifications. Partner tokens only |
+| `vehicle_pricing_info` | Pricing by market and model. Partner tokens only |
+| `enterprise_management` | Enterprise functions for business accounts |
+
+## Virtual keys
+
+Commanding a 2021+ vehicle requires a virtual key paired to the car. Host your
+public key, register the domain, then send the user to the pairing link.
+
+```ts
+import { virtualKeyPairingUrl, publicKeyUrl } from '@bankkroll/tesdk'
+
+publicKeyUrl('example.com')
+// https://example.com/.well-known/appspecific/com.tesla.3p.public-key.pem
+
+virtualKeyPairingUrl({ domain: 'example.com', vin })
+// https://tesla.com/_ak/example.com?vin=...
+```
+
+---
+
+# Guides
+
+> The parts of the Fleet API that surprise people, and how this SDK models them.
+
+## Regions
+
+Fleet API is partitioned into three isolated deployments. A token minted for one
+is rejected by the others, so the region is a correctness concern rather than a
+latency optimization.
+
+| Region | Host | Coverage |
+| --- | --- | --- |
+| `na` | `fleet-api.prd.na.vn.cloud.tesla.com` | North America, Asia-Pacific |
+| `eu` | `fleet-api.prd.eu.vn.cloud.tesla.com` | Europe, Middle East, Africa |
+| `cn` | `fleet-api.prd.cn.vn.cloud.tesla.cn` | China |
+
+```ts
+const client = await new TeslaClient({ accessToken }).forUserRegion()
+```
+
+## Command signing
+
+Vehicles from 2021 onward reject unsigned commands. Signing is not something an
+HTTP layer can do for you: commands are re-encoded as protobuf and signed with
+your private key over the Vehicle Command Protocol, and the car verifies that
+signature against its stored virtual key.
+
+```ts
+const status = await client.vehicles.fleetStatus([vin])
+status.vehicle_info?.[vin]?.vehicle_command_protocol_required
+```
+
+Run Tesla's Vehicle Command Proxy (https://github.com/teslamotors/vehicle-command)
+as a sidecar and point the client at it. Nothing else changes:
+
+```ts
+const client = new TeslaClient({ baseUrl: 'https://localhost:4443', accessToken })
+```
+
+Never put the private key in your application process. Only the public key is ever
+hosted, at `/.well-known/appspecific/com.tesla.3p.public-key.pem`.
+
+## Waking vehicles
+
+Waking draws down the traction battery, so the SDK never does it implicitly.
+
+```ts
+await client.vehicles.ensureAwake(vin)
+
+// Or run an operation and retry once if the vehicle turns out to be asleep:
+const data = await client.vehicles.withWake(vin, () => client.vehicles.data(vin))
+```
+
+A sleeping vehicle surfaces as `VehicleAsleepError`, which maps to HTTP 408. That
+status is deliberately excluded from retries: without an explicit wake, no retry
+can succeed.
+
+## Retries and idempotency
+
+Idempotent requests retry on 429, 425, and 5xx using exponential backoff with full
+jitter, honouring `Retry-After` when present.
+
+Commands with a visible physical effect are never retried:
+
+| Never retried | Retried |
+| --- | --- |
+| `honkHorn`, `flashLights`, `actuateTrunk`, media controls, `remoteBoombox`, `createShareInvite` | `doorLock`, `setChargeLimit`, `climateStart`, and other state-setting commands |
+
+## Fleet Telemetry
+
+Streaming beats polling `vehicle_data` on both cost and battery drain.
+
+```ts
+await client.telemetry.createConfig([vin], {
+  hostname: 'telemetry.example.com',
+  ca: caPem,
+  fields: {
+    Soc: { interval_seconds: 60 },
+    Location: { interval_seconds: 10, minimum_delta: 50 },
+  },
+})
+```
+
+## Browsers and CORS
+
+Tesla sends no permissive CORS headers, so a browser cannot call Fleet API
+directly. Proxy through your own backend. The SDK runs fine in a browser; the
+network policy is the obstacle.
+
+## Observability
+
+```ts
+const client = new TeslaClient({
+  accessToken,
+  onRequest: ({ method, url, status, attempt, durationMs }) => {
+    logger.info({ method, url, status, attempt, durationMs })
+  },
+})
+```
+
+---
+
+# Errors
+
+> Every failure is a `TeslaError` subclass, discriminable by class or by a stable `code`.
+
+```ts
+try {
+  await client.commands.doorLock(vin)
+} catch (error) {
+  if (error instanceof VehicleAsleepError) await client.vehicles.ensureAwake(vin)
+  else if (error instanceof RateLimitError) console.warn(`retry in ${error.retryAfter}s`)
+  else if (error instanceof TeslaError) console.error(error.code, error.requestId)
+}
+```
+
+| Class | Code | HTTP | Meaning |
+| --- | --- | --- | --- |
+| `InvalidRequestError` | `invalid_request` | 400, 422 | Malformed or rejected parameters |
+| `AuthenticationError` | `authentication_error` | 401 | Token missing, expired, or rejected |
+| `PermissionError` | `permission_error` | 403 | Missing scope or no access |
+| `SigningRequiredError` | `signing_required` | 403 | Command needs the Vehicle Command Proxy |
+| `NotFoundError` | `not_found` | 404 | Unknown VIN, site, or route |
+| `VehicleAsleepError` | `vehicle_asleep` | 408 | Vehicle asleep or out of coverage |
+| `RateLimitError` | `rate_limit` | 429 | Throttled; carries `retryAfter` |
+| `ServerError` | `server_error` | 5xx | Tesla-side failure |
+| `ConnectionError` | `connection_error` | — | DNS, TLS, socket, or CORS |
+| `TimeoutError` | `timeout` | — | Deadline exceeded or caller aborted |
+
+## Request ids
+
+Every error carries `requestId`, read from Tesla's `x-txid` response header. It is
+the identifier Tesla support asks for, and unlike a token it is safe to include in
+a public bug report.
+
+## Cancellation
+
+Every method accepts a per-call `signal` and `timeoutMs`, composed with the client
+default. A caller-initiated abort is never retried, since it was deliberate.
+
+```ts
+const controller = new AbortController()
+setTimeout(() => controller.abort(), 5_000)
+
+await client.vehicles.list({ signal: controller.signal })
+```
+
+---
+
+# client.vehicles
+
+> Listing, live data, wake handling, drivers, and share invites.
+
+Vehicle data and lifecycle operations.
+
+Accessed as `client.vehicles`.
+
+## Properties
+
+### `withWake`
+
+```ts
+withWake<T>(vin: string, operation: () => Promise<T>, options?: EnsureAwakeOptions): Promise<T>
+```
+
+Runs an operation, waking the vehicle once and retrying if it was asleep.
+
+```ts
+const data = await client.vehicles.withWake(vin, () => client.vehicles.data(vin))
+```
+
+
+## Methods
+
+### `list`
+
+```ts
+list(options?: ListVehiclesOptions & RequestOverrides): Promise<Vehicle[]>
+```
+
+Lists vehicles on the account.
+
+```ts
+const vehicles = await client.vehicles.list()
+```
+
+
+### `listAll`
+
+```ts
+listAll(options?: {
+```
+
+Iterates every vehicle on the account, requesting pages lazily.
+
+```ts
+for await (const vehicle of client.vehicles.listAll()) {
+  console.log(vehicle.vin)
+}
+```
+
+
+### `get`
+
+```ts
+get(vin: string, options?: RequestOverrides): Promise<Vehicle>
+```
+
+Retrieves a vehicle summary, including its connectivity state.
+
+Does not wake the vehicle, making it the cheapest way to check whether a
+vehicle is reachable.
+
+
+### `data`
+
+```ts
+data(vin: string, options?: VehicleDataOptions): Promise<VehicleData>
+```
+
+Fetches a live snapshot from the vehicle.
+
+Tesla treats this endpoint as billable and rate-sensitive; use Fleet
+Telemetry for continuous monitoring rather than polling here.
+
+**Throws**
+
+- {VehicleAsleepError} When the vehicle is asleep or unreachable.
+
+```ts
+const data = await client.vehicles.data(vin, { endpoints: ['charge_state'] })
+console.log(data.charge_state?.battery_level)
+```
+
+
+### `wakeUp`
+
+```ts
+wakeUp(vin: string, options?: RequestOverrides): Promise<Vehicle>
+```
+
+Requests that the vehicle wake from sleep.
+
+Returns as soon as the request is accepted; the vehicle typically takes
+10 to 60 seconds to report `online`. Use ensureAwake to wait.
+
+
+### `ensureAwake`
+
+```ts
+ensureAwake(vin: string, options?: EnsureAwakeOptions): Promise<Vehicle>
+```
+
+Wakes the vehicle if needed and resolves once it reports `online`.
+
+Returns immediately when the vehicle is already online, so it is safe to
+call before any command.
+
+**Throws**
+
+- {TimeoutError} When the vehicle does not wake within `maxWaitMs`.
+
+```ts
+await client.vehicles.ensureAwake(vin)
+await client.commands.doorLock(vin)
+```
+
+
+### `drivers`
+
+```ts
+drivers(vin: string, options?: RequestOverrides): Promise<Driver[]>
+```
+
+Returns the drivers permitted to access the vehicle.
+
+Available only to the vehicle owner.
+
+
+### `removeDriver`
+
+```ts
+removeDriver(vin: string, shareUserId: number, options?: RequestOverrides): Promise<CommandResult>
+```
+
+Revokes a driver's access to the vehicle.
+
+Share users may remove only their own access; owners may remove any.
+
+**Parameters**
+
+- `shareUserId` - Identifier from a drivers entry.
+
+
+### `mobileEnabled`
+
+```ts
+mobileEnabled(vin: string, options?: RequestOverrides): Promise<boolean>
+```
+
+
+### `nearbyChargingSites`
+
+```ts
+nearbyChargingSites(vin: string, options?: RequestOverrides): Promise<NearbyChargingSites>
+```
+
+
+### `recentAlerts`
+
+```ts
+recentAlerts(vin: string, options?: RequestOverrides): Promise<VehicleAlert[]>
+```
+
+
+### `serviceData`
+
+```ts
+serviceData(vin: string, options?: RequestOverrides): Promise<ServiceData>
+```
+
+
+### `specs`
+
+```ts
+specs(vin: string, options?: RequestOverrides): Promise<VehicleSpecs>
+```
+
+Returns specifications recorded at the time of sale.
+
+Billed at a fixed rate per successful result and accessible only with a
+partner token, for any VIN without owner authorization.
+
+
+### `releaseNotes`
+
+```ts
+releaseNotes(vin: string, options?: RequestOverrides): Promise<ReleaseNotes>
+```
+
+
+### `fleetStatus`
+
+```ts
+fleetStatus(vins: string[], options?: RequestOverrides): Promise<FleetStatus>
+```
+
+Reports application-relevant state for up to a batch of VINs.
+
+The authoritative way to discover whether a vehicle requires Vehicle
+Command Protocol signing and whether this application's virtual key is
+paired, rather than inferring either from model year.
+
+**Parameters**
+
+- `vins` - VINs to query.
+
+```ts
+const status = await client.vehicles.fleetStatus([vin])
+if (status.vehicle_info?.[vin]?.vehicle_command_protocol_required) {
+  // Route commands through a Vehicle Command Proxy.
+}
+```
+
+
+### `shareInvites`
+
+```ts
+shareInvites(vin: string, options?: PageOptions & RequestOverrides): Promise<ShareInvite[]>
+```
+
+Returns the active share invites for a vehicle.
+
+Paginated with a maximum page size of 25.
+
+
+### `createShareInvite`
+
+```ts
+createShareInvite(vin: string, options?: RequestOverrides): Promise<ShareInvite>
+```
+
+Creates a single-use share invite that expires after 24 hours.
+
+Grants driver-level app access, which excludes some owner-only features
+such as Service and Roadside. Up to five drivers may be added at a time,
+and the vehicle need not be online.
+
+Never retried automatically: each call mints a distinct invite link.
+
+
+### `revokeShareInvite`
+
+```ts
+revokeShareInvite(vin: string, invitationId: string, options?: RequestOverrides): Promise<CommandResult>
+```
+
+
+### `redeemShareInvite`
+
+```ts
+redeemShareInvite(code: string, options?: RequestOverrides): Promise<ShareInvite>
+```
+
+Redeems a share invite, granting the authenticated account app access.
+
+**Parameters**
+
+- `code` - Single-use code from the invite link.
+
+
+
+---
+
+# client.commands
+
+> Every actuating command, from locks to navigation.
+
+Remote control commands for a vehicle.
+
+Accessed as `client.commands`.
+
+## Methods
+
+### `send`
+
+```ts
+send(vin: string, command: string, body?: Record<string, unknown>, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sends an arbitrary command, including endpoints newer than this SDK.
+
+**Parameters**
+
+- `vin` - Vehicle identification number.
+- `command` - Command name as it appears in the Fleet API path.
+- `body` - JSON body for commands that take parameters.
+
+```ts
+await client.commands.send(vin, 'set_charge_limit', { percent: 80 })
+```
+
+
+### `signedCommand`
+
+```ts
+signedCommand(vin: string, payload: Record<string, unknown>, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sends a pre-signed command envelope.
+
+The generic endpoint that replaces the individual legacy command routes,
+carrying a payload already signed with the Vehicle Command Protocol. Use
+it only when signing is handled outside this SDK; a Vehicle Command Proxy
+signs the ordinary command methods for you.
+
+**Parameters**
+
+- `payload` - Signed protocol message.
+
+See: https://github.com/teslamotors/vehicle-command
+
+
+### `doorLock`
+
+```ts
+doorLock(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `doorUnlock`
+
+```ts
+doorUnlock(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `honkHorn`
+
+```ts
+honkHorn(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sounds the horn.
+
+Never retried automatically, since a repeat would honk twice.
+
+
+### `flashLights`
+
+```ts
+flashLights(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `chargeStart`
+
+```ts
+chargeStart(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `chargeStop`
+
+```ts
+chargeStop(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `setChargeLimit`
+
+```ts
+setChargeLimit(vin: string, percent: number, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sets the charge limit.
+
+**Parameters**
+
+- `percent` - Target state of charge, from 50 to 100.
+
+
+### `setChargingAmps`
+
+```ts
+setChargingAmps(vin: string, chargingAmps: number, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sets the charging current.
+
+**Parameters**
+
+- `chargingAmps` - Requested amperage, clamped by the vehicle to what
+the connected circuit supports.
+
+
+### `chargePortDoorOpen`
+
+```ts
+chargePortDoorOpen(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `chargePortDoorClose`
+
+```ts
+chargePortDoorClose(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `climateStart`
+
+```ts
+climateStart(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `climateStop`
+
+```ts
+climateStop(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `setTemps`
+
+```ts
+setTemps(vin: string, options: SetTempsOptions): Promise<CommandResult>
+```
+
+Sets driver and passenger temperature targets.
+
+```ts
+await client.commands.setTemps(vin, { driverTemp: 21 })
+```
+
+
+### `setSeatHeater`
+
+```ts
+setSeatHeater(vin: string, seat: SeatPosition, level: 0 | 1 | 2 | 3, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sets a seat heater level.
+
+**Parameters**
+
+- `level` - `0` for off through `3` for maximum.
+
+
+### `setSentryMode`
+
+```ts
+setSentryMode(vin: string, on: boolean, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `actuateTrunk`
+
+```ts
+actuateTrunk(vin: string, which: 'front' | 'rear', options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Actuates the front or rear trunk.
+
+The rear trunk toggles on vehicles with a powered liftgate, so repeated
+calls are not idempotent and are never retried.
+
+**Parameters**
+
+- `which` - `front` for the frunk, `rear` for the trunk.
+
+
+### `windowControl`
+
+```ts
+windowControl(vin: string, command: 'vent' | 'close', position?: {
+```
+
+Vents or closes the windows of a parked vehicle.
+
+Closing requires the user's coordinates so the vehicle can confirm they
+are nearby. Model 3 is exempt from that check, which is why the
+coordinates are optional.
+
+**Parameters**
+
+- `position` - User latitude and longitude, required to close on most
+platforms.
+
+
+### `sunRoofControl`
+
+```ts
+sunRoofControl(vin: string, state: 'stop' | 'close' | 'vent', options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `triggerHomelink`
+
+```ts
+triggerHomelink(vin: string, position: {
+```
+
+
+### `setBioweaponMode`
+
+```ts
+setBioweaponMode(vin: string, on: boolean, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `setClimateKeeperMode`
+
+```ts
+setClimateKeeperMode(vin: string, mode: 0 | 1 | 2 | 3, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sets Climate Keeper mode.
+
+**Parameters**
+
+- `mode` - `0` off, `1` Keep, `2` Dog, `3` Camp.
+
+
+### `setCabinOverheatProtection`
+
+```ts
+setCabinOverheatProtection(vin: string, settings: {
+```
+
+
+### `setValetMode`
+
+```ts
+setValetMode(vin: string, on: boolean, password?: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Turns on Valet Mode with a four-digit passcode.
+
+**Parameters**
+
+- `password` - Four-digit passcode required to exit Valet Mode.
+
+
+### `speedLimitActivate`
+
+```ts
+speedLimitActivate(vin: string, pin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `speedLimitDeactivate`
+
+```ts
+speedLimitDeactivate(vin: string, pin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `speedLimitSetLimit`
+
+```ts
+speedLimitSetLimit(vin: string, limitMph: number, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `mediaTogglePlayback`
+
+```ts
+mediaTogglePlayback(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Toggles media playback.
+
+Media commands are never retried, since a repeat would skip an extra track
+or toggle playback back to its previous state.
+
+
+### `mediaNextTrack`
+
+```ts
+mediaNextTrack(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `mediaPrevTrack`
+
+```ts
+mediaPrevTrack(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `adjustVolume`
+
+```ts
+adjustVolume(vin: string, volume: number, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sets media playback volume.
+
+Requires the user to be present and mobile access to be enabled.
+
+**Parameters**
+
+- `volume` - Level from 0 to 11.
+
+
+### `navigationGpsRequest`
+
+```ts
+navigationGpsRequest(vin: string, position: {
+```
+
+
+### `navigationSuperchargerRequest`
+
+```ts
+navigationSuperchargerRequest(vin: string, id: number, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `addChargeSchedule`
+
+```ts
+addChargeSchedule(vin: string, schedule: Record<string, unknown>, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Adds a charge schedule.
+
+Preferred over `set_scheduled_charging` from firmware 2024.26 onward.
+Existing schedules are readable via the `charge_schedule_data` subtree of
+VehiclesResource.data.
+
+
+### `removeChargeSchedule`
+
+```ts
+removeChargeSchedule(vin: string, id: number, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `addPreconditionSchedule`
+
+```ts
+addPreconditionSchedule(vin: string, schedule: Record<string, unknown>, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `removePreconditionSchedule`
+
+```ts
+removePreconditionSchedule(vin: string, id: number, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `setPinToDrive`
+
+```ts
+setPinToDrive(vin: string, pin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sets a four-digit PIN to Drive passcode.
+
+Requires Vehicle Command Protocol signing, and is restricted to fleet
+managers and owners. The vehicle retains the first PIN it is given, so
+changing it requires resetPinToDrive first.
+
+
+### `resetPinToDrive`
+
+```ts
+resetPinToDrive(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Clears PIN to Drive.
+
+Requires Vehicle Command Protocol signing, and works only while PIN to
+Drive is inactive and the vehicle is not in Valet Mode.
+
+
+### `setGuestMode`
+
+```ts
+setGuestMode(vin: string, enable: boolean, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `remoteBoombox`
+
+```ts
+remoteBoombox(vin: string, sound: 0 | 2000, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Plays a sound through the external speaker.
+
+**Parameters**
+
+- `sound` - `0` for the random fart, `2000` for the locate ping.
+
+
+### `remoteStartDrive`
+
+```ts
+remoteStartDrive(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `setVehicleName`
+
+```ts
+setVehicleName(vin: string, name: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Sets the vehicle name.
+
+Requires Vehicle Command Protocol signing on all supported vehicles.
+
+
+### `navigationRequest`
+
+```ts
+navigationRequest(vin: string, value: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+Shares a destination, address, or search query with the navigation system.
+
+**Parameters**
+
+- `value` - An address, a `latitude,longitude` pair, or a share URL.
+
+
+### `scheduleSoftwareUpdate`
+
+```ts
+scheduleSoftwareUpdate(vin: string, offsetSeconds: number, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+### `cancelSoftwareUpdate`
+
+```ts
+cancelSoftwareUpdate(vin: string, options?: SendCommandOptions): Promise<CommandResult>
+```
+
+
+
+---
+
+# client.energy
+
+> Powerwall, Solar, and Wall Connector sites.
+
+Energy site data and control.
+
+Accessed as `client.energy`.
+
+## Methods
+
+### `products`
+
+```ts
+products(options?: RequestOverrides): Promise<Product[]>
+```
+
+Lists every product on the account, including vehicles and energy sites.
+
+```ts
+const sites = (await client.energy.products()).filter((p) => p.energy_site_id)
+```
+
+
+### `liveStatus`
+
+```ts
+liveStatus(siteId: number | string, options?: RequestOverrides): Promise<EnergySiteLiveStatus>
+```
+
+
+### `siteInfo`
+
+```ts
+siteInfo(siteId: number | string, options?: RequestOverrides): Promise<EnergySiteInfo>
+```
+
+
+### `energyHistory`
+
+```ts
+energyHistory(siteId: number | string, period: HistoryPeriod, options?: HistoryRangeOptions): Promise<EnergyHistory>
+```
+
+Returns site energy measurements aggregated to the requested period.
+
+Energy values are in watt-hours.
+
+
+### `backupHistory`
+
+```ts
+backupHistory(siteId: number | string, period: HistoryPeriod, options?: HistoryRangeOptions): Promise<EnergyHistory>
+```
+
+
+### `chargeHistory`
+
+```ts
+chargeHistory(siteId: number | string, options?: Omit<HistoryRangeOptions, 'period'>): Promise<EnergyHistory>
+```
+
+Returns Wall Connector charging history.
+
+Energy values are in watt-hours. This endpoint takes no `period`.
+
+
+### `setBackupReserve`
+
+```ts
+setBackupReserve(siteId: number | string, percent: number, options?: RequestOverrides): Promise<EnergyCommandResult>
+```
+
+Sets the reserve held back for grid outages.
+
+**Parameters**
+
+- `percent` - Reserve level from 0 to 100.
+
+
+### `setOperationMode`
+
+```ts
+setOperationMode(siteId: number | string, mode: SiteOperationMode, options?: RequestOverrides): Promise<EnergyCommandResult>
+```
+
+
+### `setStormMode`
+
+```ts
+setStormMode(siteId: number | string, enabled: boolean, options?: RequestOverrides): Promise<EnergyCommandResult>
+```
+
+
+### `setGridImportExport`
+
+```ts
+setGridImportExport(siteId: number | string, settings: {
+```
+
+
+### `setOffGridVehicleChargingReserve`
+
+```ts
+setOffGridVehicleChargingReserve(siteId: number | string, percent: number, options?: RequestOverrides): Promise<EnergyCommandResult>
+```
+
+
+### `setTimeOfUseSettings`
+
+```ts
+setTimeOfUseSettings(siteId: number | string, tariff: Record<string, unknown>, options?: RequestOverrides): Promise<EnergyCommandResult>
+```
+
+Configures the utility rate plan used for time-of-use optimization.
+
+The tariff must define at least one season, cover every time period
+without gaps or overlaps, and use non-negative prices. Tesla publishes a
+worked example alongside the endpoint documentation.
+
+**Parameters**
+
+- `tariff` - Tariff structure sent as `tou_settings.tariff_content_v2`.
+
+See: https://developer.tesla.com/docs/fleet-api/endpoints/energy
+
+
+
+---
+
+# client.charging
+
+> Charging history, sessions, and PDF invoices.
+
+Charging history and invoices for the authenticated account.
+
+Accessed as `client.charging`.
+
+See: https://developer.tesla.com/docs/fleet-api/endpoints/charging-endpoints
+
+## Methods
+
+### `history`
+
+```ts
+history(options?: PageOptions & RequestOverrides): Promise<ChargingHistoryPage>
+```
+
+
+### `sessions`
+
+```ts
+sessions(options?: PageOptions & RequestOverrides): Promise<ChargingSessionPage>
+```
+
+Returns session detail including pricing and energy.
+
+Available only to business accounts that own a fleet of vehicles.
+
+
+### `invoice`
+
+```ts
+invoice(invoiceId: string, options?: RequestOverrides): Promise<ArrayBuffer>
+```
+
+Downloads the PDF invoice for a charging event.
+
+**Parameters**
+
+- `invoiceId` - Invoice identifier taken from a history entry.
+
+**Returns** — Raw PDF bytes, not a parsed object.
+
+
+
+---
+
+# client.telemetry
+
+> Fleet Telemetry streaming configuration.
+
+Fleet Telemetry configuration endpoints.
+
+Accessed as `client.telemetry`.
+
+## Methods
+
+### `createConfig`
+
+```ts
+createConfig(vins: string[], config: TelemetryConfig, options?: RequestOverrides): Promise<TelemetryConfigResult>
+```
+
+Applies a telemetry configuration to a set of vehicles.
+
+Send this through a Vehicle Command Proxy so the payload is signed. A
+vehicle accepts configurations from at most five applications.
+
+**Parameters**
+
+- `vins` - Vehicles to configure.
+- `config` - Server address and the fields to stream.
+
+```ts
+await client.telemetry.createConfig([vin], {
+  hostname: 'telemetry.example.com',
+  ca: caPem,
+  fields: { Soc: { interval_seconds: 60 }, Location: { interval_seconds: 10 } },
+})
+```
+
+
+### `createConfigJws`
+
+```ts
+createConfigJws(token: string, options?: RequestOverrides): Promise<TelemetryConfigResult>
+```
+
+Applies a pre-signed configuration token.
+
+Prefer createConfig through the proxy; this endpoint exists for
+callers that sign the JWS themselves using Schnorr over NIST P-256 and
+SHA-256.
+
+
+### `getConfig`
+
+```ts
+getConfig(vin: string, options?: RequestOverrides): Promise<TelemetryConfigStatus>
+```
+
+
+### `deleteConfig`
+
+```ts
+deleteConfig(vin: string, options?: RequestOverrides): Promise<TelemetryConfigResult>
+```
+
+Removes a vehicle's telemetry configuration.
+
+A partner token removes the configuration from any vehicle; a third-party
+token is limited to vehicles it has been granted access to.
+
+
+### `errors`
+
+```ts
+errors(vin: string, options?: RequestOverrides): Promise<FleetTelemetryError[]>
+```
+
+
+
+---
+
+# client.partner
+
+> Partner registration and telemetry diagnostics.
+
+Partner account endpoints.
+
+Accessed as `client.partner`. Every endpoint here requires a partner token
+obtained through the `client_credentials` grant; a third-party user token is
+rejected.
+
+See: https://developer.tesla.com/docs/fleet-api/endpoints/partner-endpoints
+
+## Methods
+
+### `register`
+
+```ts
+register(domain: string, options?: RequestOverrides): Promise<PartnerAccount>
+```
+
+Registers the application in the current region.
+
+Must be completed once per region before third-party tokens issued for
+that region are accepted. Before calling, a PEM-encoded secp256r1 public
+key must be reachable at PUBLIC_KEY_PATH on the application
+domain, and must remain hosted there for pairing to keep working.
+
+**Parameters**
+
+- `domain` - Domain hosting the public key. Must share a root domain
+with an allowed origin configured on developer.tesla.com, and is shown to
+users during virtual key pairing.
+
+
+### `publicKey`
+
+```ts
+publicKey(domain?: string, options?: RequestOverrides): Promise<PartnerPublicKey>
+```
+
+Returns the public key registered for a domain.
+
+A successful response confirms that register completed.
+
+**Parameters**
+
+- `domain` - Domain to look up. Defaults to the registered domain.
+
+
+### `fleetTelemetryErrors`
+
+```ts
+fleetTelemetryErrors(options?: RequestOverrides): Promise<FleetTelemetryError[]>
+```
+
+
+### `fleetTelemetryErrorVins`
+
+```ts
+fleetTelemetryErrorVins(options?: RequestOverrides): Promise<string[]>
+```
+
+
+
+---
+
+# client.fleet
+
+> Specs, options, pricing, warranty, and eligibility.
+
+Vehicle product information and enterprise management.
+
+Accessed as `client.fleet`.
+
+See: https://developer.tesla.com/docs/fleet-api/endpoints/vehicle-management
+
+## Methods
+
+### `options`
+
+```ts
+options(vin: string, options?: RequestOverrides): Promise<VehicleOptions>
+```
+
+
+### `eligibleSubscriptions`
+
+```ts
+eligibleSubscriptions(vin: string, options?: RequestOverrides): Promise<Eligibility>
+```
+
+
+### `eligibleUpgrades`
+
+```ts
+eligibleUpgrades(vin: string, options?: RequestOverrides): Promise<Eligibility>
+```
+
+
+### `warrantyDetails`
+
+```ts
+warrantyDetails(vin: string, options?: RequestOverrides): Promise<WarrantyDetails>
+```
+
+
+### `pricing`
+
+```ts
+pricing(request: PricingRequest, options?: RequestOverrides): Promise<Record<string, unknown>>
+```
+
+Returns pricing for a vehicle model in a market.
+
+Requires the `vehicle_pricing_info` scope, which is available only to
+partner tokens.
+
+
+### `enterpriseRoles`
+
+```ts
+enterpriseRoles(vin: string, options?: RequestOverrides): Promise<EnterpriseRoles>
+```
+
+
+### `setEnterprisePayer`
+
+```ts
+setEnterprisePayer(vin: string, payer: Record<string, unknown>, options?: RequestOverrides): Promise<Record<string, unknown>>
+```
+
+Sets payer roles for a vehicle.
+
+Requires the `enterprise_management` scope.
+
+
+
+---
+
+# client.user
+
+> Account profile, region discovery, and orders.
+
+Account profile, region, and order endpoints.
+
+Accessed as `client.user`. These endpoints require a user context and are
+therefore unavailable to third-party business tokens.
+
+See: https://developer.tesla.com/docs/fleet-api/endpoints/user-endpoints
+
+## Methods
+
+### `me`
+
+```ts
+me(options?: RequestOverrides): Promise<UserProfile>
+```
+
+
+### `region`
+
+```ts
+region(options?: RequestOverrides): Promise<UserRegion>
+```
+
+Returns the region serving this account and its Fleet API base URL.
+
+Authoritative, and preferable to inferring a region from a country code
+with regionForCountry. Takes no parameters: the result is derived
+from the token subject.
+
+
+### `featureConfig`
+
+```ts
+featureConfig(options?: RequestOverrides): Promise<Record<string, unknown>>
+```
+
+
+### `orders`
+
+```ts
+orders(options?: RequestOverrides): Promise<Order[]>
+```
+
+
+
+---
+
+# client.ocpi
+
+> Tesla Charging API locations and tariffs (OCPI 2.2.1).
+
+Tesla Charging API (OCPI 2.2.1) endpoints.
+
+Accessed as `client.ocpi`. Requires a client constructed with an OCPI token
+and the OCPI base URL supplied by Tesla during the credentials handshake.
+
+```ts
+const client = new TeslaClient({
+  baseUrl: 'https://ocpi.tesla.com',
+  ocpiToken: process.env.TESLA_OCPI_TOKEN,
+})
+const locations = await client.ocpi.locations({ limit: 100 })
+```
+
+## Methods
+
+### `locations`
+
+```ts
+locations(options?: OcpiPageOptions): Promise<Location[]>
+```
+
+Lists charging locations visible to the configured scope.
+
+Results are paged; combine `offset` and `limit`, or use
+listAllLocations to iterate.
+
+
+### `location`
+
+```ts
+location(locationId: string, options?: RequestOverrides): Promise<Location>
+```
+
+
+### `listAllLocations`
+
+```ts
+listAllLocations(options?: OcpiPageOptions): AsyncGenerator<Location, void, undefined>
+```
+
+Iterates every location, requesting pages lazily.
+
+**Parameters**
+
+- `options` - Paging controls; `limit` sets the page size.
+
+
+### `tariffs`
+
+```ts
+tariffs(options?: OcpiPageOptions): Promise<Tariff[]>
+```
+
+
+### `versionDetails`
+
+```ts
+versionDetails(options?: RequestOverrides): Promise<VersionDetails>
+```
+
+
+### `credentials`
+
+```ts
+credentials(options?: RequestOverrides): Promise<Credentials>
+```
+
+Returns the credentials currently registered for this connection.
+
+Part of the OCPI credentials handshake, which is initiated from the Tesla
+developer portal with a `CREDENTIALS_TOKEN_A`.
+
+
+
+---
+
+# client.oauth
+
+> Token flows and credential lifecycle.
+
+Token acquisition and renewal against the Tesla identity service.
+
+A single instance is safe to share across concurrent requests: overlapping
+refreshes collapse into one network call.
+
+## Methods
+
+### `authorizeUrl`
+
+```ts
+authorizeUrl(options: AuthorizeUrlOptions): string
+```
+
+Builds the URL that a user visits to grant access.
+
+**Returns** — An absolute authorization URL to redirect the user to.
+
+```ts
+const pkce = await createPkcePair()
+const state = randomString()
+const url = oauth.authorizeUrl({ scopes: ['vehicle_device_data'], state, pkce })
+```
+
+
+### `exchangeCode`
+
+```ts
+exchangeCode(options: ExchangeCodeOptions): Promise<TokenSet>
+```
+
+Exchanges an authorization code for tokens and persists them to the store.
+
+**Throws**
+
+- {AuthenticationError} When the code is invalid or already used.
+
+
+### `clientCredentials`
+
+```ts
+clientCredentials(scopes: Scope[]): Promise<TokenSet>
+```
+
+Obtains a partner token via the `client_credentials` grant.
+
+Partner tokens represent the application itself rather than a user. They
+are required for every partner endpoint, including registration, and for
+the `vehicle_specs` and `vehicle_pricing_info` scopes.
+
+**Parameters**
+
+- `scopes` - Scopes to request.
+
+```ts
+const token = await client.oauth.clientCredentials(['openid', 'vehicle_specs'])
+```
+
+
+### `businessToken`
+
+```ts
+businessToken(authCode: string, scopes: Scope[]): Promise<TokenSet>
+```
+
+Obtains a third-party business token.
+
+Uses the `client_credentials` grant with the authorization code that a
+business administrator generates from the Consent Management page in Tesla
+for Business. The resulting token carries no user context, so the
+endpoints under `client.user` are unavailable to it.
+
+**Parameters**
+
+- `authCode` - Authorization code from Consent Management.
+- `scopes` - Scopes granted by the business.
+
+
+### `refresh`
+
+```ts
+refresh(refreshToken?: string): Promise<TokenSet>
+```
+
+Exchanges a refresh token for a new token set.
+
+Concurrent calls share a single in-flight request, so a burst of expired
+requests triggers only one refresh.
+
+**Parameters**
+
+- `refreshToken` - Overrides the refresh token held in the store.
+
+
+### `getAccessToken`
+
+```ts
+getAccessToken(): Promise<string | undefined>
+```
+
+Returns a valid access token, refreshing it when it is expired or within
+the expiry skew window.
+
+**Returns** — The access token, or `undefined` when no credentials are stored.
+
+
+
+---
+
+# Types
+
+> 77 interfaces and 9 type aliases exported from `@bankkroll/tesdk`.
+
+## Type aliases
+
+### `FetchLike`
+
+```ts
+type FetchLike = (input: string, init?: RequestInit) => Promise<Response>
+```
+
+Minimal `fetch` signature accepted by the client, allowing a custom
+implementation to be injected for testing or for runtime-specific agents.
+
+### `Region`
+
+```ts
+type Region = 'na' | 'eu' | 'cn'
+```
+
+### `Scope`
+
+```ts
+type Scope = /** Allows customers to sign in with their Tesla credentials. */
+```
+
+OAuth scopes accepted by Fleet API.
+
+`openid` and `offline_access` are required to receive an id token and a
+refresh token respectively.
+
+### `VehicleState`
+
+```ts
+type VehicleState = 'online' | 'asleep' | 'offline' | 'waking' | (string & {})
+```
+
+### `VehicleDataEndpoint`
+
+```ts
+type VehicleDataEndpoint = 'charge_state' | 'climate_state' | 'closures_state' | 'drive_state' | 'gui_settings' | 'location_data' | 'vehicle_config' | 'vehicle_state' | 'vehicle_data_combo'
+```
+
+Data subtrees selectable via the `endpoints` query parameter.
+
+Requesting only the needed subtrees reduces payload size and vehicle wake
+time.
+
+### `SeatPosition`
+
+```ts
+type SeatPosition = (typeof SeatPosition)[keyof typeof SeatPosition]
+```
+
+### `SiteOperationMode`
+
+```ts
+type SiteOperationMode = 'autonomous' | 'self_consumption' | 'backup'
+```
+
+### `HistoryPeriod`
+
+```ts
+type HistoryPeriod = 'day' | 'week' | 'month' | 'year' | 'lifetime'
+```
+
+### `TeslaErrorCode`
+
+```ts
+type TeslaErrorCode = 'api_error' | 'authentication_error' | 'permission_error' | 'not_found' | 'invalid_request' | 'rate_limit' | 'vehicle_asleep' | 'server_error' | 'connection_error' | 'timeout' | 'signing_required'
+```
+
+Stable discriminant for TeslaError.code.
+
+Values are part of the public API and will not change within a major version.
+
+## Interfaces
+
+### `RetryOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `maxRetries?` | `number` |  |
+| `initialDelayMs?` | `number` |  |
+| `maxDelayMs?` | `number` |  |
+
+### `RequestOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | `'GET' \| 'POST' \| 'DELETE' \| 'PATCH' \| 'PUT'` |  |
+| `path` | `string` |  |
+| `query?` | `Record<string, string \| number \| boolean \| undefined \| null>` |  |
+| `body?` | `unknown` |  |
+| `timeoutMs?` | `number` |  |
+| `signal?` | `AbortSignal` |  |
+| `headers?` | `Record<string, string>` |  |
+| `retry?` | `RetryOptions` |  |
+| `responseType?` | `'json' \| 'binary'` | How to decode the response body. `json` parses JSON and falls back to text for other content types. `binary` returns an `ArrayBuffer` unchanged, which is required for endpoints such as PDF invoices where text decoding would corrupt bytes. |
+| `idempotent?` | `boolean` | Whether the request may be retried. Defaults to `true` for `GET`. Non-idempotent commands such as `honk_horn` set this to `false` so a retry cannot trigger a duplicate physical action. |
+
+### `HttpClientConfig`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `baseUrl` | `string` |  |
+| `fetch` | `FetchLike` |  |
+| `timeoutMs` | `number` |  |
+| `retry` | `Required<RetryOptions>` |  |
+| `userAgent` | `string` |  |
+| `defaultHeaders?` | `Record<string, string>` |  |
+| `getAuthHeader?` | `() => Promise<string \| undefined>` | Supplies the `Authorization` header value, refreshing the access token when required. Omit for unauthenticated clients. |
+| `onRequest?` | `(info: RequestLogEntry) => void` |  |
+
+### `RequestLogEntry`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `method` | `string` |  |
+| `url` | `string` |  |
+| `attempt` | `number` |  |
+| `status?` | `number` |  |
+| `durationMs` | `number` |  |
+| `error?` | `unknown` |  |
+
+### `PkcePair`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `verifier` | `string` |  |
+| `challenge` | `string` |  |
+| `method` | `'S256'` |  |
+
+### `TokenSet`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `accessToken` | `string` |  |
+| `refreshToken?` | `string` |  |
+| `expiresAt` | `number` |  |
+| `scopes?` | `string[]` |  |
+| `idToken?` | `string` |  |
+| `tokenType?` | `string` |  |
+
+### `TokenStore`
+
+Persistence adapter for tokens.
+
+Implementations may be synchronous or asynchronous, allowing an in-memory
+map, `localStorage`, a KV namespace, or a database row to be used
+interchangeably.
+
+### `OAuthClientConfig`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `clientId` | `string` |  |
+| `clientSecret?` | `string` | Application secret. Omit for public clients using PKCE, such as browser and mobile applications, where a secret cannot be kept confidential. |
+| `redirectUri?` | `string` |  |
+| `region?` | `Region` |  |
+
+### `AuthorizeUrlOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `scopes` | `Scope[]` |  |
+| `state` | `string` |  |
+| `pkce?` | `PkcePair` |  |
+| `redirectUri?` | `string` |  |
+| `prompt?` | `'login' \| 'consent'` |  |
+| `nonce?` | `string` |  |
+
+### `ExchangeCodeOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `code` | `string` |  |
+| `codeVerifier?` | `string` |  |
+| `redirectUri?` | `string` |  |
+
+### `FleetResponse`
+
+Envelope wrapping every Fleet API payload.
+
+The SDK unwraps this before returning, so `response` is not visible on
+resource method return types.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `response` | `T` |  |
+| `pagination?` | `Pagination` |  |
+| `error?` | `string` |  |
+| `error_description?` | `string` |  |
+
+### `Pagination`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `previous` | `number \| null` |  |
+| `next` | `number \| null` |  |
+| `current` | `number` |  |
+| `per_page` | `number` |  |
+| `count` | `number` |  |
+| `pages` | `number` |  |
+
+### `PageOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `page?` | `number` |  |
+| `perPage?` | `number` |  |
+
+### `RequestOverrides`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `signal?` | `AbortSignal` |  |
+| `timeoutMs?` | `number` |  |
+
+### `Vehicle`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `number` |  |
+| `vehicle_id` | `number` |  |
+| `vin` | `string` |  |
+| `display_name` | `string \| null` |  |
+| `state` | `VehicleState` |  |
+| `in_service` | `boolean` |  |
+| `id_s` | `string` |  |
+| `calendar_enabled` | `boolean` |  |
+| `api_version` | `number` |  |
+| `access_type?` | `string` |  |
+| `granular_access?` | `{` |  |
+
+### `ChargeState`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `battery_level` | `number` |  |
+| `battery_range` | `number` |  |
+| `charging_state` | `'Disconnected' \| 'Charging' \| 'Complete' \| 'Stopped' \| 'NoPower' \| (string & {})` |  |
+| `charge_limit_soc` | `number` |  |
+| `charge_amps?` | `number` |  |
+| `charge_port_door_open?` | `boolean` |  |
+| `charger_power?` | `number` |  |
+| `minutes_to_full_charge?` | `number` |  |
+| `time_to_full_charge?` | `number` |  |
+
+### `ClimateState`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `inside_temp` | `number \| null` |  |
+| `outside_temp` | `number \| null` |  |
+| `is_climate_on` | `boolean` |  |
+| `driver_temp_setting` | `number` |  |
+| `passenger_temp_setting` | `number` |  |
+| `is_preconditioning?` | `boolean` |  |
+| `seat_heater_left?` | `number` |  |
+| `seat_heater_right?` | `number` |  |
+
+### `DriveState`
+
+Drive state subtree of VehicleData.
+
+Location fields require the `vehicle_location` scope and are absent
+otherwise.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `latitude?` | `number` |  |
+| `longitude?` | `number` |  |
+| `heading?` | `number` |  |
+| `speed` | `number \| null` |  |
+| `shift_state` | `'P' \| 'R' \| 'N' \| 'D' \| null \| (string & {})` |  |
+| `power?` | `number` |  |
+| `timestamp?` | `number` |  |
+
+### `VehicleData`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `charge_state?` | `ChargeState` |  |
+| `climate_state?` | `ClimateState` |  |
+| `drive_state?` | `DriveState` |  |
+| `vehicle_state?` | `Record<string, unknown>` |  |
+| `vehicle_config?` | `Record<string, unknown>` |  |
+| `gui_settings?` | `Record<string, unknown>` |  |
+
+### `CommandResult`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `result?` | `boolean` |  |
+| `reason?` | `string` |  |
+
+### `ListVehiclesOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `page?` | `number` |  |
+| `perPage?` | `number` |  |
+
+### `Driver`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `my_tesla_unique_id?` | `number` |  |
+| `user_id?` | `number` |  |
+| `user_id_s?` | `string` |  |
+| `driver_first_name?` | `string` |  |
+| `driver_last_name?` | `string` |  |
+
+### `ChargingSite`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name?` | `string` |  |
+| `type?` | `string` |  |
+| `distance_miles?` | `number` |  |
+| `location?` | `{` |  |
+| `available_stalls?` | `number` |  |
+| `total_stalls?` | `number` |  |
+| `site_closed?` | `boolean` |  |
+
+### `NearbyChargingSites`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `congestion_sync_time_utc_secs?` | `number` |  |
+| `destination_charging?` | `ChargingSite[]` |  |
+| `superchargers?` | `ChargingSite[]` |  |
+| `timestamp?` | `number` |  |
+
+### `VehicleAlert`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name?` | `string` |  |
+| `time?` | `string` |  |
+| `audience?` | `string[]` |  |
+| `user_text?` | `string` |  |
+
+### `ServiceData`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `service_status?` | `string` |  |
+| `service_etc?` | `string` |  |
+| `service_visit_number?` | `string` |  |
+| `status_id?` | `number` |  |
+
+### `VehicleSpecs`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `vin?` | `string` |  |
+| `model?` | `string` |  |
+| `trim?` | `string` |  |
+| `year?` | `number` |  |
+
+### `ReleaseNotes`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `release_notes?` | `{` |  |
+| `version?` | `string` |  |
+
+### `ShareInvite`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id?` | `string` |  |
+| `share_link?` | `string` |  |
+| `owner_id?` | `number` |  |
+| `vehicle_id?` | `number` |  |
+| `expires_at?` | `string` |  |
+| `revoked_at?` | `string \| null` |  |
+
+### `SendCommandOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `idempotent?` | `boolean` | Whether the command may be retried after a transient failure. Left `false` for commands with a visible physical effect, where a retry could double-actuate. |
+| `throwOnFailure?` | `boolean` | Throw a TeslaError when the vehicle returns `result: false`. |
+
+### `SetTempsOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `driverTemp` | `number` |  |
+| `passengerTemp?` | `number` |  |
+
+### `HistoryRangeOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `startDate?` | `string` |  |
+| `endDate?` | `string` |  |
+| `timeZone?` | `string` |  |
+
+### `EnergySiteLiveStatus`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `solar_power?` | `number` |  |
+| `grid_power?` | `number` |  |
+| `battery_power?` | `number` |  |
+| `load_power?` | `number` |  |
+| `percentage_charged?` | `number` |  |
+| `energy_left?` | `number` |  |
+| `total_pack_energy?` | `number` |  |
+| `grid_status?` | `string` |  |
+| `storm_mode_active?` | `boolean` |  |
+| `timestamp?` | `string` |  |
+
+### `EnergySiteInfo`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` |  |
+| `site_name?` | `string` |  |
+| `backup_reserve_percent?` | `number` |  |
+| `default_real_mode?` | `SiteOperationMode` |  |
+| `installation_date?` | `string` |  |
+| `version?` | `string` |  |
+
+### `HistoryEntry`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `timestamp?` | `string` |  |
+
+### `EnergyHistory`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `period?` | `string` |  |
+| `time_series?` | `HistoryEntry[]` |  |
+| `installation_time_zone?` | `string` |  |
+
+### `EnergyCommandResult`
+
+Acknowledgement returned by energy site setting endpoints.
+
+Tesla returns varying shapes here depending on the setting, so only the
+common fields are named.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `code?` | `number` |  |
+| `message?` | `string` |  |
+
+### `Product`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `energy_site_id?` | `number` |  |
+| `vin?` | `string` |  |
+| `resource_type?` | `string` |  |
+| `site_name?` | `string` |  |
+| `id?` | `number \| string` |  |
+
+### `ChargingHistoryEntry`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `sessionId?` | `number` |  |
+| `vin?` | `string` |  |
+| `chargeStartDateTime?` | `string` |  |
+| `chargeStopDateTime?` | `string` |  |
+| `siteLocationName?` | `string` |  |
+| `energyDrawnKwh?` | `string` |  |
+| `fees?` | `unknown[]` |  |
+
+### `ChargingHistoryPage`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `data?` | `ChargingHistoryEntry[]` |  |
+| `totalResults?` | `number` |  |
+| `hasMoreData?` | `boolean` |  |
+
+### `ChargingSession`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `sessionId?` | `string` |  |
+| `vin?` | `string` |  |
+| `energyDrawnKwh?` | `number` |  |
+| `chargeStartDateTime?` | `string` |  |
+| `chargeStopDateTime?` | `string` |  |
+
+### `ChargingSessionPage`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `data?` | `ChargingSession[]` |  |
+| `totalResults?` | `number` |  |
+
+### `VehicleOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `codes?` | `{` |  |
+
+### `Eligibility`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `eligible?` | `boolean` |  |
+| `vin?` | `string` |  |
+
+### `WarrantyDetails`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `activeWarranty?` | `unknown[]` |  |
+| `upcomingWarranty?` | `unknown[]` |  |
+| `expiredWarranty?` | `unknown[]` |  |
+
+### `PricingRequest`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `market` | `string` |  |
+| `model` | `string` |  |
+| `currency?` | `string` |  |
+
+### `EnterpriseRoles`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `vin?` | `string` |  |
+| `roles?` | `unknown[]` |  |
+
+### `PartnerAccount`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `account_id?` | `string` |  |
+| `domain?` | `string` |  |
+| `name?` | `string` |  |
+| `description?` | `string` |  |
+| `client_id?` | `string` |  |
+| `ca?` | `string` |  |
+| `created_at?` | `string` |  |
+| `updated_at?` | `string` |  |
+
+### `PartnerPublicKey`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `public_key?` | `string` |  |
+
+### `FleetTelemetryError`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `vin?` | `string` |  |
+| `name?` | `string` |  |
+| `error?` | `string` |  |
+| `timestamp?` | `string` |  |
+
+### `UserProfile`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `email?` | `string` |  |
+| `full_name?` | `string` |  |
+| `profile_image_url?` | `string` |  |
+| `vault_uuid?` | `string` |  |
+
+### `UserRegion`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `region` | `string` |  |
+| `fleet_api_base_url` | `string` |  |
+
+### `Order`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `orderId?` | `string` |  |
+| `vin?` | `string` |  |
+| `modelCode?` | `string` |  |
+| `orderStatus?` | `string` |  |
+
+### `GeoLocation`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `latitude` | `string` |  |
+| `longitude` | `string` |  |
+
+### `Connector`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` |  |
+| `standard` | `string` |  |
+| `format` | `'SOCKET' \| 'CABLE' \| (string & {})` |  |
+| `power_type` | `'AC_1_PHASE' \| 'AC_3_PHASE' \| 'DC' \| (string & {})` |  |
+| `max_voltage?` | `number` |  |
+| `max_amperage?` | `number` |  |
+| `max_electric_power?` | `number` |  |
+| `tariff_ids?` | `string[]` |  |
+| `last_updated?` | `string` |  |
+
+### `Evse`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `uid` | `string` |  |
+| `evse_id?` | `string` |  |
+| `status` | `'AVAILABLE' \| 'CHARGING' \| 'OUTOFORDER' \| 'INOPERATIVE' \| 'PLANNED' \| (string & {})` |  |
+| `connectors` | `Connector[]` |  |
+| `capabilities?` | `string[]` |  |
+| `physical_reference?` | `string` |  |
+| `last_updated?` | `string` |  |
+
+### `Location`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` |  |
+| `name?` | `string` |  |
+| `address` | `string` |  |
+| `city` | `string` |  |
+| `state?` | `string` |  |
+| `postal_code?` | `string` |  |
+| `country` | `string` |  |
+| `coordinates` | `GeoLocation` |  |
+| `evses?` | `Evse[]` |  |
+| `evse_count?` | `number` |  |
+| `access_type?` | `string` |  |
+| `operator?` | `{` |  |
+| `party_id?` | `string` |  |
+| `country_code?` | `string` |  |
+| `opening_times?` | `Record<string, unknown>` |  |
+| `time_zone?` | `string` |  |
+| `last_updated?` | `string` |  |
+
+### `PriceComponent`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `type` | `'ENERGY' \| 'FLAT' \| 'PARKING_TIME' \| 'TIME' \| 'CONGESTION_TIME' \| (string & {})` | Dimension being charged. Tesla extends OCPI with `CONGESTION_TIME`, which bills time spent charging past a state-of-charge threshold. |
+| `price` | `number` |  |
+| `vat?` | `number` |  |
+| `step_size` | `number` |  |
+
+### `TariffRestrictions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `start_time?` | `string` |  |
+| `end_time?` | `string` |  |
+| `min_kwh?` | `number` |  |
+| `max_kwh?` | `number` |  |
+| `min_power?` | `number` |  |
+| `max_power?` | `number` |  |
+| `day_of_week?` | `string[]` |  |
+| `min_vehicle_soc?` | `number` |  |
+| `min_congestion_threshold?` | `number` |  |
+
+### `TariffElement`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `price_components` | `PriceComponent[]` |  |
+| `restrictions?` | `TariffRestrictions` |  |
+
+### `Tariff`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | `string` |  |
+| `currency` | `string` |  |
+| `country_code?` | `string` |  |
+| `party_id?` | `string` |  |
+| `elements` | `TariffElement[]` |  |
+| `start_date_time?` | `string` |  |
+| `end_date_time?` | `string` |  |
+| `last_updated?` | `string` |  |
+
+### `VersionEndpoint`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `identifier` | `string` |  |
+| `role?` | `string` |  |
+| `url` | `string` |  |
+
+### `VersionDetails`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `version` | `string` |  |
+| `endpoints` | `VersionEndpoint[]` |  |
+
+### `Credentials`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `token` | `string` |  |
+| `url` | `string` |  |
+| `roles?` | `{` |  |
+
+### `OcpiResponse`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `data` | `T` |  |
+| `status_code` | `number` |  |
+| `status_message?` | `string` |  |
+| `timestamp?` | `string` |  |
+
+### `OcpiPageOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `offset?` | `number` |  |
+| `limit?` | `number` |  |
+| `dateFrom?` | `string` |  |
+| `dateTo?` | `string` |  |
+
+### `TelemetryFieldConfig`
+
+Per-field streaming rules.
+
+A value is sent only once `interval_seconds` has elapsed since its last
+emission and the value has actually changed, so a short interval does not by
+itself increase traffic for a stable signal.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `interval_seconds` | `number` |  |
+| `minimum_delta?` | `number` | Minimum change required before the field is re-sent. Location deltas are measured in meters. Requires firmware 2025.2.6 or later. |
+| `include_fields?` | `string[]` | Fields to include in the same payload whenever this field publishes, even if their own value has not changed. Requires Fleet Telemetry client 1.3.0. |
+
+### `TelemetryConfig`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `hostname` | `string` |  |
+| `ca` | `string` |  |
+| `fields` | `Record<string, TelemetryFieldConfig>` |  |
+| `exp?` | `number` |  |
+| `port?` | `number` |  |
+| `delivery_policy?` | `'latest'` | Set to `latest` to have the vehicle resend data the server has not acknowledged. Requires Fleet Telemetry server 0.7.1 or later. |
+
+### `TelemetryConfigResult`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `updated_vehicles?` | `number` |  |
+| `skipped_vehicles?` | `Record<string, unknown>` |  |
+
+### `TelemetryConfigStatus`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `synced?` | `boolean` |  |
+| `config?` | `TelemetryConfig` |  |
+| `limit_reached?` | `boolean` |  |
+
+### `VehicleDataOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `endpoints?` | `VehicleDataEndpoint[]` | Subtrees to fetch. Requesting only what is needed reduces payload size and shortens how long the vehicle stays awake. |
+
+### `EnsureAwakeOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `maxWaitMs?` | `number` |  |
+| `pollIntervalMs?` | `number` |  |
+
+### `FleetStatus`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `key_paired_vins?` | `string[]` |  |
+| `unpaired_vins?` | `string[]` |  |
+| `vehicle_info?` | `Record<string, VehicleFleetInfo>` |  |
+
+### `VehicleFleetInfo`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `vehicle_command_protocol_required?` | `boolean` | Whether the vehicle rejects unsigned commands. When `true`, route commands through a Vehicle Command Proxy. |
+| `firmware_version?` | `string` |  |
+| `fleet_telemetry_version?` | `string` |  |
+| `total_number_of_keys?` | `number` |  |
+| `discounted_device_data?` | `boolean` |  |
+| `safety_screen_streaming_toggle_enabled?` | `boolean` |  |
+
+### `TeslaClientOptions`
+
+Configuration for TeslaClient.
+
+Optional properties accept an explicit `undefined` so that values read
+straight from `process.env` can be passed without narrowing.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `region?` | `Region \| undefined` | Region to route requests to. A token minted for one region is rejected by the others. |
+| `baseUrl?` | `string \| undefined` | Overrides the base URL derived from `region`. Set this to the address of a Vehicle Command Proxy so that commands are signed, or to a mock server in tests. |
+| `accessToken?` | `string \| undefined` | A static access token. Convenient for scripts. Provide `tokens` or a `tokenStore` instead when the client should refresh credentials on its own. |
+| `tokens?` | `TokenSet \| undefined` |  |
+| `tokenStore?` | `TokenStore \| undefined` | Persistence for tokens. Required for automatic refresh across restarts. |
+| `ocpiToken?` | `string \| undefined` | OCPI credentials token for the Tesla Charging API. The Charging API is a separate product from the Fleet API charging endpoints under `client.charging`: it exposes Tesla's public network as a CPO and authenticates with OCPI's `Token` scheme rather than OAuth. Setting this affects only the `ocpi` namespace, which is given its own transport. Fleet API calls on the same client continue to use the OAuth session, so one instance can serve both products. |
+| `ocpiBaseUrl?` | `string \| undefined` | Base URL for the Charging API, supplied by Tesla during the OCPI credentials handshake. Defaults to `baseUrl`, then to the region host. Set it whenever the Charging API is served from a different origin than Fleet API. |
+| `clientId?` | `string \| undefined` |  |
+| `clientSecret?` | `string \| undefined` |  |
+| `redirectUri?` | `string \| undefined` |  |
+| `timeoutMs?` | `number \| undefined` | Request timeout in milliseconds. |
+| `retry?` | `RetryOptions \| undefined` |  |
+| `fetch?` | `FetchLike \| undefined` | `fetch` implementation to use. |
+| `headers?` | `Record<string, string> \| undefined` |  |
+| `userAgent?` | `string \| undefined` | Value sent as `User-Agent` off-browser. |
+| `onRequest?` | `((info: RequestLogEntry) => void) \| undefined` |  |
+
+### `TeslaErrorOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `status?` | `number` |  |
+| `body?` | `unknown` |  |
+| `requestId?` | `string` |  |
+| `cause?` | `unknown` |  |
+
+### `PairingUrlOptions`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `domain` | `string` |  |
+| `vin?` | `string` |  |
+
+
+---

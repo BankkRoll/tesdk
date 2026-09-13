@@ -37,11 +37,11 @@ jobs:
 
       # Fails the job if the committed api.json is stale, so a pull request
       # that changes the public surface cannot merge with outdated docs.
-      - name: Check committed api.json is current
+      - name: Check generated docs are current
         run: |
-          if ! git diff --quiet -- docs/assets/api.json; then
-            echo "::error::docs/assets/api.json is out of date. Run 'npm run docs:build' and commit the result."
-            git diff --stat -- docs/assets/api.json
+          if ! git diff --quiet -- docs/assets/api.json docs/llms.txt docs/llms-full.txt docs/md; then
+            echo "::error::Generated docs are out of date. Run 'npm run docs:build' and commit the result."
+            git diff --stat -- docs/assets/api.json docs/llms.txt docs/llms-full.txt docs/md
             exit 1
           fi
 

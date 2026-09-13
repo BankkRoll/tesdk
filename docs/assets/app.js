@@ -62,6 +62,15 @@ const ICON = {
   issue:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16.2v.1"/></svg>',
 
+  markdown:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M6 15.5v-7l3 3.5 3-3.5v7M16 8.5v7M16 15.5l2.2-2.5M16 15.5l-2.2-2.5"/></svg>',
+
+  chevron:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+
+  sparkle:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>',
+
   external:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h6v6M19 5l-8 8M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4"/></svg>',
 }
@@ -650,6 +659,131 @@ function pageExamples() {
   </div>`
 }
 
+/* ── Page actions ──────────────────────────────────────────────────────── */
+
+/**
+ * Destinations offered by the page-action menu.
+ *
+ * Each builds a prompt around the page's Markdown URL rather than pasting the
+ * body, so the assistant fetches canonical source instead of a stale copy.
+ */
+const AI_TARGETS = [
+  {
+    id: 'claude',
+    label: 'Open in Claude',
+    url: (p) => `https://claude.ai/new?q=${p}`,
+  },
+  {
+    id: 'chatgpt',
+    label: 'Open in ChatGPT',
+    url: (p) => `https://chatgpt.com/?q=${p}`,
+  },
+]
+
+/** Markdown URL for the current route. */
+function markdownUrl(hash = location.hash) {
+  const route = hash.replace(/^#/, '') || '/'
+  const slug = route === '/' ? 'index' : route.slice(1).replace(/\//g, '-')
+  return new URL(`md/${slug}.md`, location.href.split('#')[0]).toString()
+}
+
+/** Fetches the current page as Markdown. */
+async function fetchMarkdown() {
+  const res = await fetch(markdownUrl())
+  if (!res.ok) throw new Error(`${res.status}`)
+  return await res.text()
+}
+
+/** Renders the actions control that sits above each page title. */
+function pageActions() {
+  return `<div class="pg-actions">
+    <button class="pg-btn pg-copy" type="button">
+      ${ICON.markdown}<span>Copy page</span>
+    </button>
+    <div class="pg-menu-wrap">
+      <button class="pg-btn pg-more" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="More page actions">
+        ${ICON.chevron}
+      </button>
+      <div class="pg-menu" role="menu" hidden>
+        <button class="pg-item" role="menuitem" data-act="copy">${ICON.copy}Copy as Markdown</button>
+        <a class="pg-item" role="menuitem" data-act="view" href="#" target="_blank" rel="noopener">${ICON.markdown}View as Markdown${ICON.external}</a>
+        <div class="pg-sep"></div>
+        ${AI_TARGETS.map(
+          (t) =>
+            `<a class="pg-item" role="menuitem" data-ai="${t.id}" href="#" target="_blank" rel="noopener">${ICON.sparkle}${t.label}${ICON.external}</a>`,
+        ).join('')}
+        <div class="pg-sep"></div>
+        <a class="pg-item" role="menuitem" href="llms.txt" target="_blank" rel="noopener">${ICON.markdown}llms.txt${ICON.external}</a>
+        <a class="pg-item" role="menuitem" href="llms-full.txt" target="_blank" rel="noopener">${ICON.markdown}llms-full.txt${ICON.external}</a>
+      </div>
+    </div>
+  </div>`
+}
+
+/** Wires the copy button, the dropdown, and the AI destinations. */
+function wirePageActions() {
+  const root = $('.pg-actions')
+  if (!root) return
+
+  const copyBtn = $('.pg-copy', root)
+  const moreBtn = $('.pg-more', root)
+  const menu = $('.pg-menu', root)
+  const mdUrl = markdownUrl()
+
+  const prompt = encodeURIComponent(
+    `Read ${mdUrl} — documentation for the ${API.package.name} TypeScript SDK — and help me use it.`,
+  )
+
+  for (const a of menu.querySelectorAll('[data-ai]')) {
+    a.href = AI_TARGETS.find((t) => t.id === a.dataset.ai).url(prompt)
+  }
+  menu.querySelector('[data-act="view"]').href = mdUrl
+
+  /** Copies the page Markdown, reporting the outcome on the button. */
+  const copy = async (btn, label) => {
+    const original = btn.innerHTML
+    try {
+      await navigator.clipboard.writeText(await fetchMarkdown())
+      btn.innerHTML = `${ICON.check}<span>Copied</span>`
+      btn.classList.add('done')
+    } catch {
+      btn.innerHTML = `<span>${label} failed</span>`
+    }
+    setTimeout(() => {
+      btn.innerHTML = original
+      btn.classList.remove('done')
+    }, 1600)
+  }
+
+  copyBtn.addEventListener('click', () => copy(copyBtn, 'Copy'))
+  menu.querySelector('[data-act="copy"]').addEventListener('click', (e) => {
+    e.preventDefault()
+    closeMenu()
+    copy(copyBtn, 'Copy')
+  })
+
+  const openMenu = () => {
+    menu.hidden = false
+    moreBtn.setAttribute('aria-expanded', 'true')
+  }
+  const closeMenu = () => {
+    menu.hidden = true
+    moreBtn.setAttribute('aria-expanded', 'false')
+  }
+
+  moreBtn.addEventListener('click', (e) => {
+    e.stopPropagation()
+    menu.hidden ? openMenu() : closeMenu()
+  })
+
+  document.addEventListener('click', (e) => {
+    if (!root.contains(e.target)) closeMenu()
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu()
+  })
+}
+
 /* ── Router ────────────────────────────────────────────────────────────── */
 
 const ROUTES = [
@@ -712,7 +846,7 @@ function route() {
     ? { title: `client.${nsMatch[1]}`, render: () => pageNamespace(nsMatch[1]) }
     : (ROUTES.find((r) => r.path === hash) ?? ROUTES[0])
 
-  $('.main').innerHTML = page.render()
+  $('.main').innerHTML = pageActions() + page.render()
   $('.sidebar').innerHTML = renderSidebar(hash)
   $('.toc').innerHTML = renderToc()
 
@@ -726,6 +860,7 @@ function route() {
     a.classList.toggle('active', a.dataset.route === section)
   }
 
+  wirePageActions()
   wireCopy()
   wireScrollSpy()
 }

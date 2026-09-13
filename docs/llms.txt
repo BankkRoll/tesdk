@@ -1,0 +1,35 @@
+# @bankkroll/tesdk
+
+> Universal TypeScript SDK for the Tesla Fleet API — runs on Node, browsers, and edge runtimes. 122 typed methods across
+> 10 namespaces, zero runtime dependencies, MIT licensed.
+
+Every page below is available as Markdown. Fetch these instead of the rendered
+HTML: they carry the same content without the markup.
+
+## Docs
+
+- [Overview](https://bankkroll.github.io/tesdk/md/index.md): Universal TypeScript SDK for the Tesla Fleet API — runs on Node, browsers, and edge runtimes.
+- [Quickstart](https://bankkroll.github.io/tesdk/md/quickstart.md): From an empty project to reading live vehicle data.
+- [Authentication](https://bankkroll.github.io/tesdk/md/auth.md): Three token types, each for a different relationship between your application
+- [Guides](https://bankkroll.github.io/tesdk/md/guides.md): The parts of the Fleet API that surprise people, and how this SDK models them.
+- [Errors](https://bankkroll.github.io/tesdk/md/errors.md): Every failure is a `TeslaError` subclass, discriminable by class or by a stable `code`.
+- [Types](https://bankkroll.github.io/tesdk/md/types.md): 77 interfaces and 9 type aliases exported from `@bankkroll/tesdk`.
+
+## API reference
+
+- [client.vehicles](https://bankkroll.github.io/tesdk/md/api-vehicles.md): Listing, live data, wake handling, drivers, and share invites.
+- [client.commands](https://bankkroll.github.io/tesdk/md/api-commands.md): Every actuating command, from locks to navigation.
+- [client.energy](https://bankkroll.github.io/tesdk/md/api-energy.md): Powerwall, Solar, and Wall Connector sites.
+- [client.charging](https://bankkroll.github.io/tesdk/md/api-charging.md): Charging history, sessions, and PDF invoices.
+- [client.telemetry](https://bankkroll.github.io/tesdk/md/api-telemetry.md): Fleet Telemetry streaming configuration.
+- [client.partner](https://bankkroll.github.io/tesdk/md/api-partner.md): Partner registration and telemetry diagnostics.
+- [client.fleet](https://bankkroll.github.io/tesdk/md/api-fleet.md): Specs, options, pricing, warranty, and eligibility.
+- [client.user](https://bankkroll.github.io/tesdk/md/api-user.md): Account profile, region discovery, and orders.
+- [client.ocpi](https://bankkroll.github.io/tesdk/md/api-ocpi.md): Tesla Charging API locations and tariffs (OCPI 2.2.1).
+- [client.oauth](https://bankkroll.github.io/tesdk/md/api-oauth.md): Token flows and credential lifecycle.
+
+## Optional
+
+- [Full documentation](https://bankkroll.github.io/tesdk/llms-full.txt): Every page concatenated into one document
+- [Repository](https://github.com/BankkRoll/tesdk): Source, examples, and issue tracker
+- [Tesla Fleet API](https://developer.tesla.com/docs/fleet-api): The upstream API this wraps
