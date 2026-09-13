@@ -13,7 +13,7 @@
  * instead.
  */
 
-import { createTokenStore, type TokenSet, type TokenStore } from 'tesdk'
+import { createTokenStore, type TokenSet, type TokenStore } from '@bankkroll/tesdk'
 
 /** KV key holding the serialized {@link TokenSet}. */
 const TOKENS_KEY = 'tesla:tokens'

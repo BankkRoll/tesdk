@@ -7,7 +7,7 @@
  * id and redirect URI are the whole configuration surface.
  */
 
-import type { Region, Scope } from 'tesdk'
+import type { Region, Scope } from '@bankkroll/tesdk'
 
 /** Regions the SDK routes to, used to validate the configured value. */
 const REGIONS: readonly Region[] = ['na', 'eu', 'cn']

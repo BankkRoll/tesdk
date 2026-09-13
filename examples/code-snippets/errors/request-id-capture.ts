@@ -4,7 +4,7 @@
  * Prerequisites: none.
  */
 
-import { TeslaClient, TeslaError, type RequestLogEntry } from 'tesdk'
+import { TeslaClient, TeslaError, type RequestLogEntry } from '@bankkroll/tesdk'
 
 /** A failure, reduced to what a support ticket needs. */
 export interface SupportReport {

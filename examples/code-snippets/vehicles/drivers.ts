@@ -5,7 +5,7 @@
  * Share users can list drivers but may remove only their own access.
  */
 
-import { NotFoundError, PermissionError, TeslaClient, type Driver } from 'tesdk'
+import { NotFoundError, PermissionError, TeslaClient, type Driver } from '@bankkroll/tesdk'
 
 /**
  * Lists the drivers permitted to access a vehicle.

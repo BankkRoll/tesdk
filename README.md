@@ -6,9 +6,9 @@
 
 Vehicles · Commands · Energy · Charging · Telemetry · OCPI
 
-[![npm](https://img.shields.io/npm/v/tesdk?color=171a20&labelColor=171a20)](https://www.npmjs.com/package/tesdk)
-[![bundle](https://img.shields.io/bundlephobia/minzip/tesdk?color=171a20&labelColor=171a20&label=gzip)](https://bundlephobia.com/package/tesdk)
-[![types](https://img.shields.io/badge/types-included-171a20?labelColor=171a20)](https://arethetypeswrong.github.io/?p=tesdk)
+[![npm](https://img.shields.io/npm/v/@bankkroll/tesdk?color=171a20&labelColor=171a20)](https://www.npmjs.com/package/@bankkroll/tesdk)
+[![bundle](https://img.shields.io/bundlephobia/minzip/tesdk?color=171a20&labelColor=171a20&label=gzip)](https://bundlephobia.com/package/@bankkroll/tesdk)
+[![types](https://img.shields.io/badge/types-included-171a20?labelColor=171a20)](https://arethetypeswrong.github.io/?p=@bankkroll/tesdk)
 [![license](https://img.shields.io/npm/l/tesdk?color=171a20&labelColor=171a20)](LICENSE)
 
 </div>
@@ -16,11 +16,11 @@ Vehicles · Commands · Energy · Charging · Telemetry · OCPI
 ---
 
 ```sh
-npm install tesdk
+npm install @bankkroll/tesdk
 ```
 
 ```ts
-import { TeslaClient } from 'tesdk'
+import { TeslaClient } from '@bankkroll/tesdk'
 
 const client = new TeslaClient({ region: 'na', accessToken: process.env.TESLA_TOKEN })
 

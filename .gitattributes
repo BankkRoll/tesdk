@@ -1,0 +1,14 @@
+# Normalize line endings so the repo is identical across platforms.
+* text=auto eol=lf
+
+# Lockfiles and generated output are noise in diffs and reviews.
+package-lock.json linguist-generated=true -diff
+CHANGELOG.md merge=union
+
+# Binary assets that must never be line-ending normalized.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary

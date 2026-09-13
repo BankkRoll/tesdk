@@ -5,7 +5,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { createTokenStore, type Region, type TokenSet, type TokenStore } from 'tesdk'
+import { createTokenStore, type Region, type TokenSet, type TokenStore } from '@bankkroll/tesdk'
 
 /** Credentials and defaults read from the environment. */
 export interface CliConfig {

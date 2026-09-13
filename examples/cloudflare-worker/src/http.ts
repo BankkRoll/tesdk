@@ -17,7 +17,7 @@ import {
   TeslaError,
   TimeoutError,
   VehicleAsleepError,
-} from 'tesdk'
+} from '@bankkroll/tesdk'
 
 /** Error envelope returned by every failing route. */
 export interface ErrorBody {

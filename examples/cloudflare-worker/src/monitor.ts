@@ -7,7 +7,7 @@
  * runtime behind it.
  */
 
-import { TeslaError, VehicleAsleepError, type TeslaClient, type Vehicle } from 'tesdk'
+import { TeslaError, VehicleAsleepError, type TeslaClient, type Vehicle } from '@bankkroll/tesdk'
 import { putRunSummary, putSnapshot, type ChargeSnapshot, type RunSummary } from './store.js'
 
 /**

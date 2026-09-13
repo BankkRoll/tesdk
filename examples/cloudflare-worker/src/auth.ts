@@ -10,7 +10,7 @@
  * only consumer.
  */
 
-import { createPkcePair, randomString, type Scope, type TeslaClient } from 'tesdk'
+import { createPkcePair, randomString, type Scope, type TeslaClient } from '@bankkroll/tesdk'
 import { json } from './http.js'
 
 /** Scopes the monitor and the command routes need. */

@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_charging_cmds`.
  */
 
-import { TeslaClient, type ChargeState, type CommandResult } from 'tesdk'
+import { TeslaClient, type ChargeState, type CommandResult } from '@bankkroll/tesdk'
 
 /**
  * Starts charging if the vehicle is plugged in and not already charging.

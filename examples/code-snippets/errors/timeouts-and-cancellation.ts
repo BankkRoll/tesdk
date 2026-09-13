@@ -4,7 +4,7 @@
  * Prerequisites: none.
  */
 
-import { TeslaClient, TimeoutError, type Vehicle, type VehicleData } from 'tesdk'
+import { TeslaClient, TimeoutError, type Vehicle, type VehicleData } from '@bankkroll/tesdk'
 
 /**
  * Builds a client with a shorter default deadline than the SDK's 30 seconds.

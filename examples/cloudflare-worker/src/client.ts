@@ -6,7 +6,7 @@
  * in-flight refresh state would outlive the request that started it.
  */
 
-import { TeslaClient } from 'tesdk'
+import { TeslaClient } from '@bankkroll/tesdk'
 import type { Env, WorkerConfig } from './env.js'
 import { kvTokenStore } from './store.js'
 

@@ -5,7 +5,7 @@
  * a tariff has no effect in `self_consumption` or `backup`.
  */
 
-import { TeslaClient, type EnergyCommandResult } from 'tesdk'
+import { TeslaClient, type EnergyCommandResult } from '@bankkroll/tesdk'
 
 /**
  * A two-rate weekday tariff with a flat weekend.

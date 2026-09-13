@@ -11,7 +11,7 @@ import {
   type TeslaClient,
   type Vehicle,
   type VehicleData,
-} from 'tesdk'
+} from '@bankkroll/tesdk'
 import { bar, bold, cyan, dim, green, heading, line, row, spin, stateBadge, yellow } from './ui.ts'
 
 /** Signature shared by every command. */

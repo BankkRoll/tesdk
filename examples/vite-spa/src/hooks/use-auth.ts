@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { createPkcePair, randomString, type TeslaClient, type TokenSet } from 'tesdk'
+import { createPkcePair, randomString, type TeslaClient, type TokenSet } from '@bankkroll/tesdk'
 import { createClient } from '../lib/client.ts'
 import { SCOPES, appConfig } from '../lib/config.ts'
 import { describeError, type Failure } from '../lib/errors.ts'

@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_device_data`.
  */
 
-import { TeslaClient, type Vehicle } from 'tesdk'
+import { TeslaClient, type Vehicle } from '@bankkroll/tesdk'
 
 /**
  * Fetches a single page.

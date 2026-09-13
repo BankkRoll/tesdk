@@ -7,7 +7,7 @@
 
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { TeslaError } from 'tesdk'
+import { TeslaError } from '@bankkroll/tesdk'
 import { signIn } from './actions.ts'
 import { clientFromSession } from '../lib/session.ts'
 

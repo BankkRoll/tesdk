@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_cmds`.
  */
 
-import { TeslaClient, type ChargingSite, type CommandResult } from 'tesdk'
+import { TeslaClient, type ChargingSite, type CommandResult } from '@bankkroll/tesdk'
 
 /**
  * Navigates to a coordinate pair.

@@ -4,7 +4,7 @@
  * Prerequisites: a token with `energy_device_data`.
  */
 
-import { TeslaClient, type Product } from 'tesdk'
+import { TeslaClient, type Product } from '@bankkroll/tesdk'
 
 /** An energy site with its identifier already narrowed to a number. */
 export interface EnergySite {

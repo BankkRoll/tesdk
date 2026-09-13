@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useState } from 'react'
-import type { TeslaClient } from 'tesdk'
+import type { TeslaClient } from '@bankkroll/tesdk'
 import { useCommand } from '../hooks/use-command.ts'
 import { COMMANDS, CONTROL_NAMES } from '../lib/commands.ts'
 import { describeError, type Failure } from '../lib/errors.ts'

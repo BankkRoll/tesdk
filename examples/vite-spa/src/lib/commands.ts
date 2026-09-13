@@ -6,7 +6,7 @@
  * control is one entry here, and nothing outside this table is callable.
  */
 
-import type { CommandResult, TeslaClient } from 'tesdk'
+import type { CommandResult, TeslaClient } from '@bankkroll/tesdk'
 
 /** A command the UI exposes, with the label on its button. */
 interface Command {

@@ -7,7 +7,7 @@
  * `vehicle_cmds`, or `vehicle_location`.
  */
 
-import { TeslaClient, virtualKeyPairingUrl } from 'tesdk'
+import { TeslaClient, virtualKeyPairingUrl } from '@bankkroll/tesdk'
 
 /** Pairing state for one vehicle. */
 export interface PairingState {

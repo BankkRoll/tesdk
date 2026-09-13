@@ -5,7 +5,7 @@
  * so the snippet compiles against any implementation.
  */
 
-import { TeslaClient, type RequestLogEntry } from 'tesdk'
+import { TeslaClient, type RequestLogEntry } from '@bankkroll/tesdk'
 
 /** The subset of a structured logger this uses. */
 export interface Logger {

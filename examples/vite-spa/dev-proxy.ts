@@ -23,7 +23,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { request as httpRequest } from 'node:http'
 import { Agent, request as httpsRequest } from 'node:https'
-import { REGION_BASE_URLS, TOKEN_URLS, type Region } from 'tesdk'
+import { REGION_BASE_URLS, TOKEN_URLS, type Region } from '@bankkroll/tesdk'
 import type { Connect, Plugin } from 'vite'
 
 /** Path prefix the SPA sends Fleet API requests to. */

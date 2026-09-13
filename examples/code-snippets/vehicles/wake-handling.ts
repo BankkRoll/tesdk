@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_device_data` and `vehicle_cmds`.
  */
 
-import { TeslaClient, TimeoutError, VehicleAsleepError, type VehicleData } from 'tesdk'
+import { TeslaClient, TimeoutError, VehicleAsleepError, type VehicleData } from '@bankkroll/tesdk'
 
 /**
  * Wakes the vehicle up front, then reads it.

@@ -5,7 +5,7 @@
  * `auth/postgres-token-store.ts` and `auth/redis-token-store.ts`.
  */
 
-import { TeslaClient, type TokenStore } from 'tesdk'
+import { TeslaClient, type TokenStore } from '@bankkroll/tesdk'
 
 /** Builds the store holding one user's credentials. */
 export type StoreFactory = (userId: string) => TokenStore

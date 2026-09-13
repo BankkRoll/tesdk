@@ -13,7 +13,7 @@
     "login": "node --env-file-if-exists=.env --import tsx src/main.ts login"
   },
   "dependencies": {
-    "tesdk": "*"
+    "@bankkroll/tesdk": "*"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",

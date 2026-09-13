@@ -5,7 +5,7 @@
  * Prerequisites: a token with `vehicle_device_data`.
  */
 
-import { TeslaClient, type VehicleFleetInfo } from 'tesdk'
+import { TeslaClient, type VehicleFleetInfo } from '@bankkroll/tesdk'
 
 /** What an application needs to know before sending a vehicle a command. */
 export interface CommandReadiness {

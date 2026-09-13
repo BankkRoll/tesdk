@@ -4,7 +4,7 @@
  * Prerequisites: a token with `energy_cmds`.
  */
 
-import { TeslaClient, type EnergyCommandResult, type SiteOperationMode } from 'tesdk'
+import { TeslaClient, type EnergyCommandResult, type SiteOperationMode } from '@bankkroll/tesdk'
 
 /**
  * Sets the charge held back for grid outages.

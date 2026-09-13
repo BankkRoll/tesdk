@@ -6,7 +6,7 @@
  * message instead of an opaque OAuth rejection later.
  */
 
-import type { Region } from 'tesdk'
+import type { Region } from '@bankkroll/tesdk'
 
 /**
  * Bindings injected by the Workers runtime.

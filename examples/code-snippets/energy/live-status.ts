@@ -4,7 +4,7 @@
  * Prerequisites: a token with `energy_device_data`.
  */
 
-import { TeslaClient, type EnergySiteLiveStatus } from 'tesdk'
+import { TeslaClient, type EnergySiteLiveStatus } from '@bankkroll/tesdk'
 
 /** Instantaneous power flow, in watts, with signs normalized. */
 export interface PowerFlow {

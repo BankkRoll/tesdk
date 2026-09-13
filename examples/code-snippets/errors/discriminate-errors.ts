@@ -17,7 +17,7 @@ import {
   TimeoutError,
   VehicleAsleepError,
   type TeslaErrorCode,
-} from 'tesdk'
+} from '@bankkroll/tesdk'
 
 /** What the caller should do about a failure. */
 export type Remedy =

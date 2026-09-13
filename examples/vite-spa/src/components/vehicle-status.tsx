@@ -7,7 +7,7 @@
  * after a command.
  */
 
-import type { ChargeState, VehicleData, VehicleState } from 'tesdk'
+import type { ChargeState, VehicleData, VehicleState } from '@bankkroll/tesdk'
 import {
   formatDuration,
   formatPercent,

@@ -9,7 +9,7 @@
  * driver; `pg`, `postgres.js`, and most pools satisfy it.
  */
 
-import { createTokenStore, type TokenSet, type TokenStore } from 'tesdk'
+import { createTokenStore, type TokenSet, type TokenStore } from '@bankkroll/tesdk'
 
 /** The subset of a Postgres driver this store needs. */
 export interface QueryableDb {

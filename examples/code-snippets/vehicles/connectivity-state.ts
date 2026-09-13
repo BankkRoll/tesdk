@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_device_data`.
  */
 
-import { TeslaClient, type Vehicle, type VehicleState } from 'tesdk'
+import { TeslaClient, type Vehicle, type VehicleState } from '@bankkroll/tesdk'
 
 /**
  * Returns a vehicle's connectivity state.

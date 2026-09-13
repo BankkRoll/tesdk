@@ -5,7 +5,7 @@
  * private key your Vehicle Command Proxy signs with.
  */
 
-import { PUBLIC_KEY_PATH, publicKeyUrl } from 'tesdk'
+import { PUBLIC_KEY_PATH, publicKeyUrl } from '@bankkroll/tesdk'
 
 /**
  * Handles a request for the well-known public key path.

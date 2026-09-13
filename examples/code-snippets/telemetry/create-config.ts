@@ -6,7 +6,7 @@
  * must be signed.
  */
 
-import { TeslaClient, type TelemetryConfig, type TelemetryConfigResult } from 'tesdk'
+import { TeslaClient, type TelemetryConfig, type TelemetryConfigResult } from '@bankkroll/tesdk'
 
 /**
  * Streams state of charge and location to a self-hosted server.

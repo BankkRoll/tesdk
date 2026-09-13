@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "tesdk": "*"
+    "@bankkroll/tesdk": "*"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",

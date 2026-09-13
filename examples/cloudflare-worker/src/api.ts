@@ -6,7 +6,7 @@
  * context and lets errors propagate to the entry point's mapper.
  */
 
-import { VehicleAsleepError, type CommandResult, type TeslaClient } from 'tesdk'
+import { VehicleAsleepError, type CommandResult, type TeslaClient } from '@bankkroll/tesdk'
 import { json } from './http.js'
 import { getRunSummary, getSnapshot, listSnapshots } from './store.js'
 

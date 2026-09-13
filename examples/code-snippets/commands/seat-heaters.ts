@@ -5,7 +5,7 @@
  * climate control is running.
  */
 
-import { SeatPosition, TeslaClient, type CommandResult } from 'tesdk'
+import { SeatPosition, TeslaClient, type CommandResult } from '@bankkroll/tesdk'
 
 /** Heater level: `0` off through `3` maximum. */
 export type HeaterLevel = 0 | 1 | 2 | 3

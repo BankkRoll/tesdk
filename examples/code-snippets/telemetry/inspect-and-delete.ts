@@ -6,7 +6,7 @@
  * has access to.
  */
 
-import { TeslaClient, type FleetTelemetryError, type TelemetryConfigStatus } from 'tesdk'
+import { TeslaClient, type FleetTelemetryError, type TelemetryConfigStatus } from '@bankkroll/tesdk'
 
 /** Where a vehicle stands relative to its target configuration. */
 export interface ConfigState {

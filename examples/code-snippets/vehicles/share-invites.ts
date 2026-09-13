@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_cmds`, held by the vehicle owner.
  */
 
-import { TeslaClient, type ShareInvite } from 'tesdk'
+import { TeslaClient, type ShareInvite } from '@bankkroll/tesdk'
 
 /**
  * Mints a share link granting driver-level app access.

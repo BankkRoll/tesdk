@@ -11,8 +11,8 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { SigningRequiredError, TeslaError, createPkcePair, randomString } from 'tesdk'
-import type { TeslaClient } from 'tesdk'
+import { SigningRequiredError, TeslaError, createPkcePair, randomString } from '@bankkroll/tesdk'
+import type { TeslaClient } from '@bankkroll/tesdk'
 import {
   appConfig,
   clearSession,

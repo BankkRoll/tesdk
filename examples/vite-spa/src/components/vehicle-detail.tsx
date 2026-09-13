@@ -11,7 +11,7 @@
  */
 
 import { useCallback } from 'react'
-import type { TeslaClient } from 'tesdk'
+import type { TeslaClient } from '@bankkroll/tesdk'
 import { useAsync } from '../hooks/use-async.ts'
 import { useCommand } from '../hooks/use-command.ts'
 import { FailureNotice, Notice } from './notice.tsx'

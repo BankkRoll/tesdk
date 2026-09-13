@@ -4,7 +4,7 @@
  * Prerequisites: none.
  */
 
-import { RateLimitError, TeslaClient, type Vehicle } from 'tesdk'
+import { RateLimitError, TeslaClient, type Vehicle } from '@bankkroll/tesdk'
 
 /**
  * Runs an operation, waiting out a rate limit once if one is hit.

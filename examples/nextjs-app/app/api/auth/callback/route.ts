@@ -6,7 +6,7 @@
  */
 
 import { NextResponse, type NextRequest } from 'next/server'
-import { TeslaError } from 'tesdk'
+import { TeslaError } from '@bankkroll/tesdk'
 import { createClient, setSession, takeOAuthState } from '../../../../lib/session.ts'
 
 /** Redirects home with a message the UI can surface. */

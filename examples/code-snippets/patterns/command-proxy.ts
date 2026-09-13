@@ -6,7 +6,7 @@
  * public half is registered on your domain.
  */
 
-import { SigningRequiredError, TeslaClient, type TokenStore } from 'tesdk'
+import { SigningRequiredError, TeslaClient, type TokenStore } from '@bankkroll/tesdk'
 
 /** Client pair for an application that talks to both hosts. */
 export interface ClientPair {

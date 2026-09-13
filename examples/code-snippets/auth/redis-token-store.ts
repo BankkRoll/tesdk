@@ -6,7 +6,7 @@
  * `ioredis` and `@upstash/redis` both satisfy it.
  */
 
-import { createTokenStore, type TokenSet, type TokenStore } from 'tesdk'
+import { createTokenStore, type TokenSet, type TokenStore } from '@bankkroll/tesdk'
 
 /** The subset of a Redis client this store needs. */
 export interface RedisLike {

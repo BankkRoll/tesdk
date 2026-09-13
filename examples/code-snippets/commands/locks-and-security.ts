@@ -5,7 +5,7 @@
  * vehicles that require signing.
  */
 
-import { TeslaClient, type CommandResult } from 'tesdk'
+import { TeslaClient, type CommandResult } from '@bankkroll/tesdk'
 
 /**
  * Locks the doors, waking the vehicle first if it is asleep.

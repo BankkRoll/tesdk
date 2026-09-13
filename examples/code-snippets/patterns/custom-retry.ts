@@ -4,7 +4,7 @@
  * Prerequisites: none.
  */
 
-import { TeslaClient, type RetryOptions } from 'tesdk'
+import { TeslaClient, type RetryOptions } from '@bankkroll/tesdk'
 
 /**
  * Retry policy for an interactive request path.

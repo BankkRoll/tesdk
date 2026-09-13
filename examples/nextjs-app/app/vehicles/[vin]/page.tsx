@@ -5,8 +5,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { NotFoundError, TeslaError, VehicleAsleepError } from 'tesdk'
-import type { VehicleData } from 'tesdk'
+import { NotFoundError, TeslaError, VehicleAsleepError } from '@bankkroll/tesdk'
+import type { VehicleData } from '@bankkroll/tesdk'
 import { clientFromSession } from '../../../lib/session.ts'
 import { VehicleControls } from './controls.tsx'
 

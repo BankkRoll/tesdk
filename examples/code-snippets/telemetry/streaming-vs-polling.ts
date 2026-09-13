@@ -6,7 +6,7 @@
  * for the migration helper.
  */
 
-import { TeslaClient, type TelemetryConfig } from 'tesdk'
+import { TeslaClient, type TelemetryConfig } from '@bankkroll/tesdk'
 
 /** What a monitoring strategy costs per vehicle per day. */
 export interface DailyCost {

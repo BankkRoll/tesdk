@@ -11,7 +11,7 @@
  * this module is the seam where that swap happens.
  */
 
-import type { TokenSet } from 'tesdk'
+import type { TokenSet } from '@bankkroll/tesdk'
 
 /** Key holding the serialized {@link TokenSet}. */
 const SESSION_KEY = 'tesdk.session'

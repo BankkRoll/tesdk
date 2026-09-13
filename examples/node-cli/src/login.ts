@@ -7,7 +7,7 @@
 
 import { createServer } from 'node:http'
 import { once } from 'node:events'
-import { createPkcePair, randomString, type TeslaClient, type TokenSet } from 'tesdk'
+import { createPkcePair, randomString, type TeslaClient, type TokenSet } from '@bankkroll/tesdk'
 import type { CliConfig } from './config.ts'
 import { cyan, dim, line } from './ui.ts'
 

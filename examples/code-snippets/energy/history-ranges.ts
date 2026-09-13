@@ -4,7 +4,7 @@
  * Prerequisites: a token with `energy_device_data`.
  */
 
-import { TeslaClient, type EnergyHistory, type HistoryPeriod } from 'tesdk'
+import { TeslaClient, type EnergyHistory, type HistoryPeriod } from '@bankkroll/tesdk'
 
 /**
  * Fetches energy history for a calendar range.

@@ -6,7 +6,7 @@
  * key already hosted on the application domain (see `host-public-key.ts`).
  */
 
-import { TeslaClient, type PartnerAccount, type TokenSet } from 'tesdk'
+import { TeslaClient, type PartnerAccount, type TokenSet } from '@bankkroll/tesdk'
 
 /**
  * Mints a partner token, which represents the application rather than a user.

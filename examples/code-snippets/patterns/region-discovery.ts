@@ -10,7 +10,7 @@ import {
   regionForCountry,
   type Region,
   type TokenSet,
-} from 'tesdk'
+} from '@bankkroll/tesdk'
 
 /**
  * Returns a client bound to whichever region actually serves this account.

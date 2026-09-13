@@ -12,7 +12,7 @@
  * exactly as they would on a server.
  */
 
-import { TeslaClient, TOKEN_URLS, createTokenStore, type TokenSet } from 'tesdk'
+import { TeslaClient, TOKEN_URLS, createTokenStore, type TokenSet } from '@bankkroll/tesdk'
 import { appConfig } from './config.ts'
 
 /** Same-origin prefix the dev proxy forwards to Fleet API. */

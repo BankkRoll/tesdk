@@ -1,6 +1,6 @@
 {
-  "name": "tesdk",
-  "version": "0.0.0",
+  "name": "@bankkroll/tesdk",
+  "version": "0.1.0",
   "description": "Universal TypeScript SDK for the Tesla Fleet API — runs on Node, browsers, and edge runtimes.",
   "keywords": [
     "tesla",

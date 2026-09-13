@@ -5,7 +5,7 @@
  * that `offline_access` was granted.
  */
 
-import { TeslaClient, type TokenSet, type Vehicle } from 'tesdk'
+import { TeslaClient, type TokenSet, type Vehicle } from '@bankkroll/tesdk'
 
 /**
  * Builds a client that refreshes on its own.

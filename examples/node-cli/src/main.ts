@@ -7,7 +7,7 @@
  * TypeScript loader.
  */
 
-import { TeslaClient, TeslaError } from 'tesdk'
+import { TeslaClient, TeslaError } from '@bankkroll/tesdk'
 import {
   energy,
   fleetStatus,

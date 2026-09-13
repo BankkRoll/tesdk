@@ -5,7 +5,7 @@
  * Telemetry client 1.3.0 or later for `include_fields`.
  */
 
-import type { TelemetryFieldConfig } from 'tesdk'
+import type { TelemetryFieldConfig } from '@bankkroll/tesdk'
 
 /**
  * Fields for a fleet-tracking application.

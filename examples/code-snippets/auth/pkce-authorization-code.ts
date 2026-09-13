@@ -6,7 +6,7 @@
  * URI allowed on developer.tesla.com.
  */
 
-import { TeslaClient, createPkcePair, randomString, type Scope, type TokenSet } from 'tesdk'
+import { TeslaClient, createPkcePair, randomString, type Scope, type TokenSet } from '@bankkroll/tesdk'
 
 /** Values that must survive between the redirect and the callback. */
 export interface PendingAuthorization {

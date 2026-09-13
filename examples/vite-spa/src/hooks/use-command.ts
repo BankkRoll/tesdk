@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useState, useTransition } from 'react'
-import type { TeslaClient } from 'tesdk'
+import type { TeslaClient } from '@bankkroll/tesdk'
 import { COMMANDS, type CommandName } from '../lib/commands.ts'
 import { describeError, type Failure } from '../lib/errors.ts'
 

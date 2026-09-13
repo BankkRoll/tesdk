@@ -15,7 +15,7 @@ import 'server-only'
  */
 
 import { cookies } from 'next/headers'
-import { TeslaClient, createTokenStore, type Region, type TokenSet } from 'tesdk'
+import { TeslaClient, createTokenStore, type Region, type TokenSet } from '@bankkroll/tesdk'
 
 /** Name of the cookie holding the serialized token set. */
 const SESSION_COOKIE = 'tesla_session'

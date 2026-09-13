@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_cmds`.
  */
 
-import { TeslaClient, type CommandResult, type SendCommandOptions } from 'tesdk'
+import { TeslaClient, type CommandResult, type SendCommandOptions } from '@bankkroll/tesdk'
 
 /**
  * Sends any command by its Fleet API path segment.

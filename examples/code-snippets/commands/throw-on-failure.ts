@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_cmds`.
  */
 
-import { TeslaError, TeslaClient, type CommandResult } from 'tesdk'
+import { TeslaError, TeslaClient, type CommandResult } from '@bankkroll/tesdk'
 
 /**
  * Sends a command and treats a vehicle-side rejection as an error.

@@ -19,7 +19,7 @@ import {
   TeslaError,
   TimeoutError,
   VehicleAsleepError,
-} from 'tesdk'
+} from '@bankkroll/tesdk'
 
 /** A failure rendered as a notice. */
 export interface Failure {

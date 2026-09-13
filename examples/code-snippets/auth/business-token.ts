@@ -5,7 +5,7 @@
  * code that a business administrator generated from the Consent Management page.
  */
 
-import { TeslaClient, type Scope, type Vehicle } from 'tesdk'
+import { TeslaClient, type Scope, type Vehicle } from '@bankkroll/tesdk'
 
 /**
  * Exchanges a Consent Management authorization code for a business token.

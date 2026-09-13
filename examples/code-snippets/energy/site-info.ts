@@ -4,7 +4,7 @@
  * Prerequisites: a token with `energy_device_data`.
  */
 
-import { TeslaClient, type EnergySiteInfo, type SiteOperationMode } from 'tesdk'
+import { TeslaClient, type EnergySiteInfo, type SiteOperationMode } from '@bankkroll/tesdk'
 
 /** The settings worth surfacing before changing anything. */
 export interface SiteSettings {

@@ -5,7 +5,7 @@
  * requires a business account that owns the vehicles.
  */
 
-import { TeslaClient, type ChargingHistoryEntry } from 'tesdk'
+import { TeslaClient, type ChargingHistoryEntry } from '@bankkroll/tesdk'
 
 /**
  * Walks charging history until Tesla stops reporting more.

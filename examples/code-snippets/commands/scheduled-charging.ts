@@ -5,7 +5,7 @@
  * later for the `add_charge_schedule` endpoint used here.
  */
 
-import { TeslaClient, type CommandResult } from 'tesdk'
+import { TeslaClient, type CommandResult } from '@bankkroll/tesdk'
 
 /** A recurring charge window. */
 export interface ChargeWindow {

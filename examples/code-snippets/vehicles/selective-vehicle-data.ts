@@ -5,7 +5,7 @@
  * for the `location_data` subtree.
  */
 
-import { TeslaClient, type ChargeState, type DriveState, type VehicleData } from 'tesdk'
+import { TeslaClient, type ChargeState, type DriveState, type VehicleData } from '@bankkroll/tesdk'
 
 /**
  * Fetches just the charge state.

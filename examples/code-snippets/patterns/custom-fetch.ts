@@ -4,7 +4,7 @@
  * Prerequisites: none.
  */
 
-import { TeslaClient, type FetchLike } from 'tesdk'
+import { TeslaClient, type FetchLike } from '@bankkroll/tesdk'
 
 /**
  * Builds a `fetch` that answers from a fixture table instead of the network.

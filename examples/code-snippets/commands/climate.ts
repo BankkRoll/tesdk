@@ -4,7 +4,7 @@
  * Prerequisites: a token with `vehicle_cmds`.
  */
 
-import { TeslaClient, type ClimateState, type CommandResult } from 'tesdk'
+import { TeslaClient, type ClimateState, type CommandResult } from '@bankkroll/tesdk'
 
 /**
  * Preconditions the cabin to a target temperature.
