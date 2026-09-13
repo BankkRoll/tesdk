@@ -7,9 +7,18 @@
 Vehicles · Commands · Energy · Charging · Telemetry · OCPI
 
 [![npm](https://img.shields.io/npm/v/@bankkroll/tesdk?color=171a20&labelColor=171a20)](https://www.npmjs.com/package/@bankkroll/tesdk)
-[![bundle](https://img.shields.io/bundlephobia/minzip/tesdk?color=171a20&labelColor=171a20&label=gzip)](https://bundlephobia.com/package/@bankkroll/tesdk)
-[![types](https://img.shields.io/badge/types-included-171a20?labelColor=171a20)](https://arethetypeswrong.github.io/?p=@bankkroll/tesdk)
-[![license](https://img.shields.io/npm/l/tesdk?color=171a20&labelColor=171a20)](LICENSE)
+[![bundle](https://img.shields.io/bundlejs/size/@bankkroll/tesdk?color=171a20&labelColor=171a20&label=gzip)](https://bundlejs.com/?q=@bankkroll/tesdk)
+[![types](https://img.shields.io/badge/types-included-171a20?labelColor=171a20)](https://arethetypeswrong.github.io/?p=@bankkroll%2Ftesdk)
+[![CI](https://img.shields.io/github/actions/workflow/status/BankkRoll/tesdk/ci.yml?branch=main&color=171a20&labelColor=171a20&label=CI)](https://github.com/BankkRoll/tesdk/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/@bankkroll/tesdk?color=171a20&labelColor=171a20)](LICENSE)
+
+### **[📖 Read the documentation →](https://bankkroll.github.io/tesdk/)**
+
+[Quickstart](https://bankkroll.github.io/tesdk/#/quickstart) ·
+[Authentication](https://bankkroll.github.io/tesdk/#/auth) ·
+[Guides](https://bankkroll.github.io/tesdk/#/guides) ·
+[API reference](https://bankkroll.github.io/tesdk/#/api) ·
+[Examples](https://bankkroll.github.io/tesdk/#/examples)
 
 </div>
 
