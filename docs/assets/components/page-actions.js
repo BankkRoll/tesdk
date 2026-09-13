@@ -52,7 +52,7 @@ async function fetchMarkdown() {
  */
 function item({ tag = 'a', attrs = '', icon = '', brand = '', label, ext = false }) {
   const rel = tag === 'a' ? ' target="_blank" rel="noopener"' : ' type="button"'
-  const tint = brand ? ` data-brand="${brand}" style="color:${BRAND_COLOR[brand]}"` : ''
+  const tint = brand ? ` style="color:${BRAND_COLOR[brand]}"` : ''
   return `<${tag} class="pg-item" role="menuitem" ${attrs}${rel}>
     <span class="pg-item-icon${brand ? ' brand-ink' : ''}"${tint}>${icon}</span>
     <span class="pg-item-label">${label}</span>

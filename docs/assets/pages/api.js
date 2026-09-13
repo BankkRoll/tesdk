@@ -84,14 +84,32 @@ export function pageApiIndex() {
 
 export function pageNamespace(key) {
   const ns = getApi().namespaces.find((n) => n.key === key)
-  if (!ns) return `<h1>Not found</h1><p>No namespace named <code>${esc(key)}</code>.</p>`
+  if (!ns) {
+    return `${pageHeader({
+      section: 'Reference',
+      title: 'Not found',
+      crumbs: [{ label: 'API reference', href: '#/api' }],
+    })}
+    <p>No namespace named <code>${esc(key)}</code>.</p>`
+  }
 
   const methods = ns.members.filter((m) => m.kind === 'method')
   const props = ns.members.filter((m) => m.kind !== 'method')
 
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`
+
+  const meta = [{ label: plural(methods.length, 'method', 'methods'), icon: ICON.terminal }]
+  if (props.length) meta.push({ label: plural(props.length, 'property', 'properties'), icon: ICON.layers })
+
   return `
-  <h1><code>client.${esc(ns.key)}</code></h1>
-  <p class="lede">${esc(ns.blurb)}</p>
+  ${pageHeader({
+    section: 'Reference',
+    title: `client.${ns.key}`,
+    lede: esc(ns.blurb),
+    crumbs: [{ label: 'API reference', href: '#/api' }],
+    meta,
+    code: true,
+  })}
   ${ns.doc ? `<div class="api-doc">${md(ns.doc)}</div>` : ''}
   ${ns.see.length ? `<div class="note"><span class="note-icon">→</span><div>${ns.see.map((s) => md(s)).join('')}</div></div>` : ''}
   ${ns.examples.map((ex) => codeBlock(ex.code, ex.title)).join('')}

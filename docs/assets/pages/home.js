@@ -14,6 +14,9 @@ export function pageHome() {
 
   return `
   <div class="hero">
+    <div class="pg-head-top hero-top">
+      <div class="pg-actions"></div>
+    </div>
     <h1>${esc(p.name.split('/').pop())}</h1>
     <p class="lede">${esc(p.description)}</p>
     <div class="hero-actions">

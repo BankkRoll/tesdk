@@ -492,6 +492,13 @@ kbd {
   max-width: 620px;
   font-size: 18px;
 }
+/* The hero has no breadcrumb to sit beside, so the actions align right on
+   their own row above the title. */
+.hero-top {
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1635,18 +1642,6 @@ tbody tr:hover {
 .brand-ink svg {
   width: 15px;
   height: 15px;
-}
-
-/* Marks render in their official colour by default. Two lose the panel they
-   sit on — a blanket filter cannot fix both, since one needs darkening and the
-   other lightening — so each is corrected only in the theme where it fails,
-   by the least amount that clears 3:1. */
-.brand-ink[data-brand='perplexity'] {
-  filter: brightness(0.82);
-}
-
-.dark .brand-ink[data-brand='openai'] {
-  filter: brightness(1.75) saturate(0.9);
 }
 
 .pg-sep {
