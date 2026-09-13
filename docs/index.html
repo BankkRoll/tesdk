@@ -54,18 +54,14 @@
         <span class="badge-ver brand-ver">v0.0.0</span>
       </a>
 
-      <nav class="hdr-nav" aria-label="Primary">
-        <a href="#/quickstart" data-route="/quickstart">Quickstart</a>
-        <a href="#/guides" data-route="/guides">Guides</a>
-        <a href="#/api" data-route="/api">API</a>
-        <a href="#/examples" data-route="/examples">Examples</a>
-      </nav>
-
       <div class="hdr-right">
         <button class="search-open" aria-label="Search documentation">
           <span class="search-open-label">Search</span>
           <span class="kbd">⌘K</span>
         </button>
+
+        <!-- Populated per route: the Markdown URL changes with the page. -->
+        <div class="pg-actions"></div>
 
         <div class="hdr-icons">
           <button class="icon-btn theme-btn" aria-label="Toggle colour theme"></button>
@@ -159,7 +155,7 @@
     </div>
   </div>
 
-  <script type="module" src="assets/app.js"></script>
+  <script type="module" src="assets/main.js"></script>
 </body>
 
 </html>

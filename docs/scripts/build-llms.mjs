@@ -460,6 +460,75 @@ const data = await client.vehicles.withWake(vin, () => client.vehicles.data(vin)
   ].join('\n')
 }
 
+/** API reference index. */
+function apiIndexMd() {
+  return [
+    '# API reference',
+    '',
+    '> Generated from the shipped type declarations, so it always matches the',
+    '> installed version.',
+    '',
+    '## Client',
+    '',
+    fence(`const client = new TeslaClient({
+  region: 'na',                    // 'na' | 'eu' | 'cn'
+  accessToken,                     // or tokens / tokenStore for auto-refresh
+  baseUrl,                         // Vehicle Command Proxy address
+  ocpiToken, ocpiBaseUrl,          // Charging API, a separate product
+  timeoutMs: 30_000,
+  retry: { maxRetries: 2, initialDelayMs: 500, maxDelayMs: 8_000 },
+  onRequest: (info) => logger.info(info),
+})`),
+    '',
+    '## Namespaces',
+    '',
+    ...API.namespaces.map((ns) => {
+      const count = ns.members.filter((m) => m.kind === 'method').length
+      return `- [client.${ns.key}](./api-${ns.key}.md) (${count} methods) — ${ns.blurb}`
+    }),
+    '',
+    `Plus ${API.shapes.length} exported types: see [Types](./types.md).`,
+  ].join('\n')
+}
+
+/** Examples index. */
+function examplesMd() {
+  const repo = API.package.repository
+  const apps = [
+    ['Node CLI', 'node-cli', 'Browser OAuth with a loopback server, file-backed tokens, wake handling'],
+    ['Next.js 16', 'nextjs-app', 'Server Actions, httpOnly cookie sessions, streaming with Suspense'],
+    ['Vite SPA', 'vite-spa', "PKCE in the browser, and the dev proxy Tesla's missing CORS headers force"],
+    ['Cloudflare Worker', 'cloudflare-worker', 'Cron fleet monitor, KV token store, zero Node built-ins'],
+  ]
+  const snippets = [
+    ['Auth', 8, 'auth'],
+    ['Vehicles', 8, 'vehicles'],
+    ['Commands', 9, 'commands'],
+    ['Energy', 6, 'energy'],
+    ['Telemetry', 4, 'telemetry'],
+    ['Errors', 4, 'errors'],
+    ['Patterns', 6, 'patterns'],
+  ]
+
+  return [
+    '# Examples',
+    '',
+    '> Four runnable applications and 45 focused snippets, all typechecked in CI',
+    '> against the built SDK.',
+    '',
+    '## Applications',
+    '',
+    ...apps.map(([name, dir, blurb]) => `- [${name}](${repo}/tree/main/examples/${dir}): ${blurb}`),
+    '',
+    '## Snippets',
+    '',
+    ...snippets.map(
+      ([name, count, dir]) =>
+        `- [${name}](${repo}/tree/main/examples/code-snippets/${dir}): ${count} snippets`,
+    ),
+  ].join('\n')
+}
+
 /** Every generated page, in navigation order. */
 const PAGES = [
   { slug: 'index', route: '/', title: 'Overview', body: overviewMd },
@@ -467,6 +536,7 @@ const PAGES = [
   { slug: 'auth', route: '/auth', title: 'Authentication', body: authMd },
   { slug: 'guides', route: '/guides', title: 'Guides', body: guidesMd },
   { slug: 'errors', route: '/errors', title: 'Errors', body: errorsMd },
+  { slug: 'api', route: '/api', title: 'API reference', body: apiIndexMd },
   ...API.namespaces.map((ns) => ({
     slug: `api-${ns.key}`,
     route: `/api/${ns.key}`,
@@ -474,6 +544,7 @@ const PAGES = [
     body: () => namespaceMd(ns),
   })),
   { slug: 'types', route: '/types', title: 'Types', body: typesMd },
+  { slug: 'examples', route: '/examples', title: 'Examples', body: examplesMd },
 ]
 
 mkdirSync(resolve(docs, 'md'), { recursive: true })

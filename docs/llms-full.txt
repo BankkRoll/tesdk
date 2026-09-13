@@ -380,6 +380,42 @@ await client.vehicles.list({ signal: controller.signal })
 
 ---
 
+# API reference
+
+> Generated from the shipped type declarations, so it always matches the
+> installed version.
+
+## Client
+
+```ts
+const client = new TeslaClient({
+  region: 'na',                    // 'na' | 'eu' | 'cn'
+  accessToken,                     // or tokens / tokenStore for auto-refresh
+  baseUrl,                         // Vehicle Command Proxy address
+  ocpiToken, ocpiBaseUrl,          // Charging API, a separate product
+  timeoutMs: 30_000,
+  retry: { maxRetries: 2, initialDelayMs: 500, maxDelayMs: 8_000 },
+  onRequest: (info) => logger.info(info),
+})
+```
+
+## Namespaces
+
+- [client.vehicles](./api-vehicles.md) (19 methods) — Listing, live data, wake handling, drivers, and share invites.
+- [client.commands](./api-commands.md) (47 methods) — Every actuating command, from locks to navigation.
+- [client.energy](./api-energy.md) (12 methods) — Powerwall, Solar, and Wall Connector sites.
+- [client.charging](./api-charging.md) (3 methods) — Charging history, sessions, and PDF invoices.
+- [client.telemetry](./api-telemetry.md) (5 methods) — Fleet Telemetry streaming configuration.
+- [client.partner](./api-partner.md) (4 methods) — Partner registration and telemetry diagnostics.
+- [client.fleet](./api-fleet.md) (7 methods) — Specs, options, pricing, warranty, and eligibility.
+- [client.user](./api-user.md) (4 methods) — Account profile, region discovery, and orders.
+- [client.ocpi](./api-ocpi.md) (6 methods) — Tesla Charging API locations and tariffs (OCPI 2.2.1).
+- [client.oauth](./api-oauth.md) (6 methods) — Token flows and credential lifecycle.
+
+Plus 86 exported types: see [Types](./types.md).
+
+---
+
 # client.vehicles
 
 > Listing, live data, wake handling, drivers, and share invites.
@@ -2598,5 +2634,29 @@ straight from `process.env` can be passed without narrowing.
 | `domain` | `string` |  |
 | `vin?` | `string` |  |
 
+
+---
+
+# Examples
+
+> Four runnable applications and 45 focused snippets, all typechecked in CI
+> against the built SDK.
+
+## Applications
+
+- [Node CLI](https://github.com/BankkRoll/tesdk/tree/main/examples/node-cli): Browser OAuth with a loopback server, file-backed tokens, wake handling
+- [Next.js 16](https://github.com/BankkRoll/tesdk/tree/main/examples/nextjs-app): Server Actions, httpOnly cookie sessions, streaming with Suspense
+- [Vite SPA](https://github.com/BankkRoll/tesdk/tree/main/examples/vite-spa): PKCE in the browser, and the dev proxy Tesla's missing CORS headers force
+- [Cloudflare Worker](https://github.com/BankkRoll/tesdk/tree/main/examples/cloudflare-worker): Cron fleet monitor, KV token store, zero Node built-ins
+
+## Snippets
+
+- [Auth](https://github.com/BankkRoll/tesdk/tree/main/examples/code-snippets/auth): 8 snippets
+- [Vehicles](https://github.com/BankkRoll/tesdk/tree/main/examples/code-snippets/vehicles): 8 snippets
+- [Commands](https://github.com/BankkRoll/tesdk/tree/main/examples/code-snippets/commands): 9 snippets
+- [Energy](https://github.com/BankkRoll/tesdk/tree/main/examples/code-snippets/energy): 6 snippets
+- [Telemetry](https://github.com/BankkRoll/tesdk/tree/main/examples/code-snippets/telemetry): 4 snippets
+- [Errors](https://github.com/BankkRoll/tesdk/tree/main/examples/code-snippets/errors): 4 snippets
+- [Patterns](https://github.com/BankkRoll/tesdk/tree/main/examples/code-snippets/patterns): 6 snippets
 
 ---

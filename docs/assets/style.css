@@ -1332,29 +1332,28 @@ tbody tr:hover {
   overscroll-behavior: contain;
 }
 
-/* ── Page actions ────────────────────────────────────────────────────────── */
+/* ── Page actions (header) ───────────────────────────────────────────────── */
 
 .pg-actions {
   display: flex;
-  gap: 0;
-  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .pg-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 30px;
+  height: 32px;
   padding: 0 10px;
-  background: var(--surface);
+  background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius) 0 0 var(--radius);
   color: var(--text-muted);
   font-family: var(--sans);
   font-size: 12.5px;
   font-weight: 500;
-  cursor: pointer;
   white-space: nowrap;
+  cursor: pointer;
   transition:
     background 0.14s ease,
     color 0.14s ease,
@@ -1362,7 +1361,7 @@ tbody tr:hover {
 }
 
 .pg-btn:hover {
-  background: var(--surface-hover);
+  background: var(--surface);
   border-color: var(--border-strong);
   color: var(--text);
 }
@@ -1380,13 +1379,14 @@ tbody tr:hover {
 
 .pg-menu-wrap {
   position: relative;
+  display: flex;
 }
 
 .pg-more {
   width: 28px;
   padding: 0;
   justify-content: center;
-  border-left: none;
+  margin-left: -1px;
   border-radius: 0 var(--radius) var(--radius) 0;
 }
 
@@ -1395,13 +1395,15 @@ tbody tr:hover {
   height: 13px;
 }
 
+/* Anchored to the right edge: the control sits near the end of the header, so
+   a left-anchored menu would run off screen. */
 .pg-menu {
   position: absolute;
-  top: calc(100% + 5px);
-  left: 0;
-  z-index: 40;
-  min-width: 222px;
-  padding: 4px;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 70;
+  min-width: 240px;
+  padding: 5px;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
@@ -1411,7 +1413,7 @@ tbody tr:hover {
 .pg-item {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   width: 100%;
   padding: 7px 9px;
   background: none;
@@ -1421,6 +1423,7 @@ tbody tr:hover {
   font-family: var(--sans);
   font-size: 13px;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
   transition:
     background 0.12s ease,
@@ -1433,41 +1436,120 @@ tbody tr:hover {
 }
 
 .pg-item svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
-/* The trailing external-link glyph is a hint, not a peer of the leading icon. */
-.pg-item svg:last-child {
-  width: 11px;
-  height: 11px;
+/* The trailing external glyph is a hint, not a peer of the leading icon. */
+.pg-item .ext {
   margin-left: auto;
   opacity: 0.5;
 }
 
+.pg-item .ext svg {
+  width: 11px;
+  height: 11px;
+}
+
+.pg-item:hover .ext {
+  opacity: 1;
+}
+
+/* Brand marks in the menu keep their own colour so the destination is
+   recognisable at a glance. */
+.pg-item .brand-ink {
+  display: inline-flex;
+}
+
 .pg-sep {
   height: 1px;
-  margin: 4px 6px;
+  margin: 5px 6px;
   background: var(--border);
 }
 
-/* The menu would overflow the viewport if it opened leftward on a phone. */
-@media (max-width: 620px) {
-  .pg-menu {
-    left: auto;
-    right: 0;
+/* ── Brand cards ─────────────────────────────────────────────────────────── */
+
+.card-brand {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'mark title' 'mark body';
+  column-gap: 14px;
+  row-gap: 2px;
+  align-items: start;
+}
+
+.card-mark {
+  grid-area: mark;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.card-mark svg {
+  width: 19px;
+  height: 19px;
+}
+
+.card-brand .card-t {
+  grid-area: title;
+  margin-bottom: 0;
+}
+
+.card-brand .card-d {
+  grid-area: body;
+}
+
+.card-t .ext {
+  margin-left: auto;
+  opacity: 0.45;
+}
+
+.card-t .ext svg {
+  width: 12px;
+  height: 12px;
+}
+
+a.card:hover .ext {
+  opacity: 0.9;
+}
+
+.card-icon {
+  display: inline-flex;
+}
+
+.card-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Responsive: page actions ────────────────────────────────────────────── */
+
+@media (max-width: 1080px) {
+  /* Label goes first; the icon still communicates the action. */
+  .pg-copy span {
+    display: none;
+  }
+
+  .pg-copy {
+    width: 32px;
+    padding: 0;
+    justify-content: center;
   }
 }
 
-/* Menu entries are controls, not prose links, so they opt out of the
-   in-content link styling the main column applies to anchors. */
-.main .pg-item,
-.main .pg-item:hover {
-  color: var(--text-muted);
-  text-decoration: none;
-}
+@media (max-width: 620px) {
+  /* The dropdown carries every action, so the phone header keeps just the
+     trigger rather than dropping the feature. */
+  .pg-copy {
+    display: none;
+  }
 
-.main .pg-item:hover {
-  color: var(--text);
+  .pg-more {
+    margin-left: 0;
+    border-radius: var(--radius);
+  }
 }

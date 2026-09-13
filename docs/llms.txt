@@ -13,7 +13,9 @@ HTML: they carry the same content without the markup.
 - [Authentication](https://bankkroll.github.io/tesdk/md/auth.md): Three token types, each for a different relationship between your application
 - [Guides](https://bankkroll.github.io/tesdk/md/guides.md): The parts of the Fleet API that surprise people, and how this SDK models them.
 - [Errors](https://bankkroll.github.io/tesdk/md/errors.md): Every failure is a `TeslaError` subclass, discriminable by class or by a stable `code`.
+- [API reference](https://bankkroll.github.io/tesdk/md/api.md): Generated from the shipped type declarations, so it always matches the
 - [Types](https://bankkroll.github.io/tesdk/md/types.md): 77 interfaces and 9 type aliases exported from `@bankkroll/tesdk`.
+- [Examples](https://bankkroll.github.io/tesdk/md/examples.md): Four runnable applications and 45 focused snippets, all typechecked in CI
 
 ## API reference
 
